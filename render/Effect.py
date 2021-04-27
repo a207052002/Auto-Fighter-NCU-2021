@@ -74,10 +74,29 @@ class Effect(pygame.sprite.Sprite):
             return True
         self.actionTimer += 1
         return False
-    
+
+    def setDamage(self, damage):
+        surface, rect = self.font.render(str(damage), (255, 0, 0))
+        self.damage = surface.convert_alpha()
+
     def DoDamage(self, x, y):
         if(self.actionTimer <= 10):
             self.image = self.damage
+            width = self.image.get_size()[0]
+            self.rect.center = (x - round(width/2), y - self.actionTimer * 2)
+            self.image.fill((255, 255, 255, 255 - round((self.actionTimer/10)*255)), None, pygame.BLEND_RGBA_MULT)
+            self.actionTimer += 1
+            return False
+        else:
+            return True
+    
+    def setMPreg(self, mp):
+        surface, rect = self.font.render(str(mp), (0, 0, 255))
+        self.mp = surface.convert_alpha()
+
+    def doMP(self, x, y):
+        if(self.actionTimer <= 10):
+            self.image = self.mp
             width = self.image.get_size()[0]
             self.rect.center = (x - round(width/2), y - self.actionTimer * 2)
             self.image.fill((255, 255, 255, 255 - round((self.actionTimer/10)*255)), None, pygame.BLEND_RGBA_MULT)
@@ -105,11 +124,6 @@ class Effect(pygame.sprite.Sprite):
         if(self.actionTimer >= 100):
             return True
         return False
-
-
-    def setDamage(self, damage):
-        surface, rect = self.font.render(str(damage), (255, 0, 0))
-        self.damage = surface.convert_alpha()
     
     def setFight(self, x, y):
         self.standardCenter = (x,y)

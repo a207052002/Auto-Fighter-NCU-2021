@@ -19,7 +19,9 @@ class RenderPlayer(pygame.sprite.Sprite):
     def __init__(self, horizon, max_hp, max_mp, scale=1, second=False):
         pygame.sprite.Sprite.__init__(self)
         self.ss = spritesheet.spritesheet('./render/resource/sprite_base_addon_2012_12_14.png', second)
+        self.ssm = spritesheet.spritesheet('./render/resource/cat2_base.png', second)
         self.images =   {}
+        self.images['meditate'] = self.ssm.load_strip((0, 0, 64, 64), 7)
         self.images['idle']   =   self.ss.load_strip((0, 0, 64, 64), 4)
         self.images['walk']  =   self.ss.load_strip((0, 64*1+1, 64, 64), 6)
         tmp =  self.ss.load_strip((0, 64*2+1, 64, 64), 8)
@@ -174,6 +176,25 @@ class RenderPlayer(pygame.sprite.Sprite):
         self.injureTimer = 0
         self.actionTimer = 0
         self.state = 'idle'
+
+    def meditate(self, toward, mp):
+        if(self.state != 'meditate'):
+            self.effect.setMPreg(mp)
+            self.effect.doMP(self.rect.center[0], self.rect.center[1] - 100)
+            self.state = 'meditate'
+            self.actionTimer = 0
+            self.updateImg('meditate', self.actionTimer, toward)
+            self.actionTimer += 1
+        else:
+            bmp = self.effect.doMP(self.rect.center[0], self.rect.center[1] - 100)
+            if(self.actionTimer < 7):
+                self.updateImg('meditate', self.actionTimer, toward)
+                self.actionTimer += 1
+            else:
+                self.updateImg('idle', 0, toward)
+                self.actionTimer += 1
+                return bmp
+        return False
 
     def jump(self, dx, sx, toward):
         if(self.state != 'jump'):

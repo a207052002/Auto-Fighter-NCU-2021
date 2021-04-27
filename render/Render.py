@@ -36,13 +36,15 @@ class Render:
         self.ticks = 15
 
     
-    def render(self, players, atkRange, move, dmg):
+    def render(self, players, atkRange, move, dmg, mp):
         pygame.display.update()
 
         if(abs(move) > 0):
             self.wholeMove(players[0], players[0].getPos())
         if(atkRange > 0):
             self.wholeAttack(players[0], atkRange, dmg, players[1])
+        if(mp > 0):
+            self.wholeMp(players[0], mp, players[1])
         return True
 
     def end(self, player):
@@ -133,6 +135,7 @@ class Render:
             self.clock.tick(self.ticks)
 
     def attack(self, player, atk_range, damage, oppose):
+        injuring = False
         current_id = player.getPid()
         current_x = self.players[current_id].getPos()[0]
         oppose_x = self.players[(current_id+1)%2].getPos()[0]
@@ -156,12 +159,36 @@ class Render:
                 self.players[(current_id+1)%2].injure(damage, toward*(-1))
                 self.updateStatus(oppose)
             if(state == 2 and damage > 0):
+                injuring = True
                 return True and self.players[(current_id+1)%2].injure(damage, toward*(-1))
             elif(state == 2):
+                if(not injuring):
+                    self.players[(current_id+1)%2].idle(toward*(-1))
                 return True
-        else:
+        if(not injuring):
             self.players[(current_id+1)%2].idle(toward*(-1))
         return False
+
+    def wholeMp(self, player, mp, oppose):
+        finish = False
+        current_id = player.getPid()
+        current_x = self.players[current_id].getPos()[0]
+        oppose_x = self.players[(current_id+1)%2].getPos()[0]
+        if(oppose_x - current_x > 0):
+            toward = RIGHT
+        else:
+            toward = LEFT
+        while(not finish):
+            pygame.event.get()
+            self.screen.fill((0,0,0))
+            self.screen.blit(self.background, [0,50])
+            self.clock.tick(self.ticks)
+            finish = self.players[current_id].meditate(toward, mp)
+            self.players[(current_id+1)%2].idle(toward*(-1))
+            self.draw()
+            pygame.display.update()
+        self.updateStatus(player)
+        self.reset()
 
     def idle(self, player, toward):
         self.players[player].idle(toward)

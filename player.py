@@ -169,7 +169,7 @@ class player:
 		absolute_move = forward_move * int(math.copysign(1, enemy.getPos() - self.getPos()))
 		move = self.move(absolute_move, enemy)
 		dmg = enemy.getHurt(self.getAtb(), self.getPos(), atk_ratio, atk_range)
-		return (atk_range, move, dmg)
+		return (atk_range, move, dmg, skill.mp_reg)
 
 
 	# this will change the player's hp

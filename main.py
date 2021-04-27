@@ -7,7 +7,7 @@ from player import *
 import leftplayer
 import rightplayer
 import standardNPC
-import advanceNPC
+import advanceTankNPC
 import kitting
 
 # import player
@@ -32,10 +32,10 @@ if(__name__ == '__main__'):
     p1.setName(kitting.name())
 
     p2.advanced()
-    p2.setPassives(advanceNPC.passive())
-    p2.setSkills(advanceNPC.skill_set())
-    p2.setActionLambda(advanceNPC.combatLogic)
-    p2.setName(advanceNPC.name())
+    p2.setPassives(advanceTankNPC.passive())
+    p2.setSkills(advanceTankNPC.skill_set())
+    p2.setActionLambda(advanceTankNPC.combatLogic)
+    p2.setName(advanceTankNPC.name())
     # p2.cheat()
     renderer = Render()
     renderer.startup([p1, p2])
@@ -50,20 +50,20 @@ if(__name__ == '__main__'):
     finish = False
 
     while(not finish):
-        (atk_range, move, dmg) = p1.action(p2)
+        (atk_range, move, dmg, mp) = p1.action(p2)
         round(p1, p2, atk_range, move, dmg)
         print(p1.getPos(), p2.getPos())
-        renderer.render([p1, p2], atk_range, move, dmg)
+        renderer.render([p1, p2], atk_range, move, dmg, mp)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
 
         if(finish):
             break
 
-        (atk_range, move, dmg) = p2.action(p1)
+        (atk_range, move, dmg, mp) = p2.action(p1)
         round(p1, p2, atk_range, move, dmg)
         print(p1.getPos(), p2.getPos())
-        renderer.render([p2, p1], atk_range, move, dmg)
+        renderer.render([p2, p1], atk_range, move, dmg, mp)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
 
