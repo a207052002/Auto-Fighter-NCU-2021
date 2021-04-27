@@ -1,16 +1,16 @@
 import sys
-sys.path.append('./render')
+
 sys.path.append('./profiles')
 import random
-from Render import *
-from player import *
+
+import advanceTankNPC
+import kitting
 import leftplayer
 import rightplayer
 import standardNPC
-import advanceTankNPC
-import kitting
 
-# import player
+from player import *
+from render import Render
 
 
 def round(p1, p2, atkRange, move, dmg):
@@ -27,13 +27,13 @@ def build():
 if(__name__ == '__main__'):
     p1, p2 = build()
     p1.setPassives(kitting.passive())
-    p1.setSkills(kitting.skill_set())
+    p1.setSkills(kitting.action_set())
     p1.setActionLambda(kitting.combatLogic)
     p1.setName(kitting.name())
 
     p2.advanced()
     p2.setPassives(advanceTankNPC.passive())
-    p2.setSkills(advanceTankNPC.skill_set())
+    p2.setSkills(advanceTankNPC.action_set())
     p2.setActionLambda(advanceTankNPC.combatLogic)
     p2.setName(advanceTankNPC.name())
     # p2.cheat()

@@ -9,7 +9,7 @@ def passive():
     # 你的角色起始有 3000 hp、300 dfs、600 atk、100 mp
     # "H" 代表分配 1 點給 HP，每點 + 100 HP
     # "D" 代表分配 1 點給 dfs，每點 + 10 dfs(防禦減傷率算法為 (dfs/660))
-    # "A" 代表分配 1 點給 atk，每點 + 80 atk(傷害算法為 80*技能倍率*(1-dfs/660))
+    # "A" 代表分配 1 點給 atk，每點 + 80 atk(傷害算法為 atk*技能倍率*(1-dfs/660))
     # "M" 代表分配 1 點給 mp，每點 + 10 mp(mp 越多可以開越強的技能)
     # 以下為簡單的範例
     # 字母順序不影響效果呈現，我們只會數對應的字母數量有多少
@@ -18,7 +18,7 @@ def passive():
     passive_str = "H" * 20 + "D" * 0 + "A" * 5 + "M" * 5
     return passive_str
 
-def skill_set():
+def action_set():
 
     # 請回傳一個陣列，並且包含四個字串
     # 陣列的順序直接影響技能編號
@@ -39,9 +39,9 @@ def skill_set():
 
     # NPC 電腦的
     # 如 "RA" 就是一格的普攻，"RRA" 就是兩格的普攻，"RRAA" 就是兩格又痛一點點的普攻
-    skill_set_str = ["RRRRA", "A" * 500 + "R", "FF", "BB"]
+    action_set_str = ["RRRRA", "A" * 500 + "R", "FF", "BB"]
 
-    return skill_set_str
+    return action_set_str
 
 def combatLogic(enemy, me):
     # 決定你的角色的自動戰鬥邏輯

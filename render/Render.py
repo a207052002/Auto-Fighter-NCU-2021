@@ -1,10 +1,10 @@
-import sys
-sys.path.append('./render')
 import pygame
-from pygame.locals import *
-from renderplayer import *
 from player import *
-from Effect import *
+from pygame.locals import *
+
+from .effect import *
+
+from .renderplayer import *
 
 GREEN = (0,255,0) # 綠色
 RED = (255,0,0) # 紅色

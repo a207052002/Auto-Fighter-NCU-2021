@@ -1,10 +1,10 @@
-import sys
-sys.path.append('./render')
-import pygame
-import spritesheet
 import numpy as np
-from Effect import *
+import pygame
 import pygame.freetype
+
+from .effect import *
+from .spritesheet import SpriteSheet
+
 
 def coor(t):
     return 10*t - 0.5*5*t**2
@@ -18,8 +18,8 @@ RIGHT   =   1
 class RenderPlayer(pygame.sprite.Sprite):
     def __init__(self, horizon, max_hp, max_mp, scale=1, second=False):
         pygame.sprite.Sprite.__init__(self)
-        self.ss = spritesheet.spritesheet('./render/resource/sprite_base_addon_2012_12_14.png', second)
-        self.ssm = spritesheet.spritesheet('./render/resource/cat2_base.png', second)
+        self.ss = SpriteSheet('./render/resource/sprite_base_addon_2012_12_14.png', second)
+        self.ssm = SpriteSheet('./render/resource/cat2_base.png', second)
         self.images =   {}
         self.images['meditate'] = self.ssm.load_strip((0, 0, 64, 64), 7)
         self.images['idle']   =   self.ss.load_strip((0, 0, 64, 64), 4)
