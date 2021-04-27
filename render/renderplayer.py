@@ -146,12 +146,13 @@ class RenderPlayer(pygame.sprite.Sprite):
         return 0
     
     def injure(self, damage, toward):
+        
         if(self.state != 'injure'):
             self.effect.reset()
             self.effect.setDamage(damage)
             self.effect.DoDamage(self.rect.center[0], self.rect.center[1] - 100)
             self.state = 'injure'
-            self.actionTimer = 1
+            self.actionTimer = 0
             surface, rect = self.font.render(str(damage), (255, 0, 0))
             self.damage = surface.convert_alpha()
             self.image = self.images['injure'][self.actionTimer]
@@ -159,6 +160,7 @@ class RenderPlayer(pygame.sprite.Sprite):
                 self.image = pygame.transform.flip(self.image, True, False)
         else:
             damaged = self.effect.DoDamage(self.rect.center[0], self.rect.center[1] - 100)
+            
             if(self.actionTimer < 6):
                 self.image = self.images['injure'][self.actionTimer]
                 if(toward is LEFT):
@@ -240,7 +242,6 @@ class RenderPlayer(pygame.sprite.Sprite):
         pygame.draw.rect(self.bar, (0, 0, 255), pygame.Rect(0, width+1, mp_len, width))
         screen.blit(self.bar, pos)
     def dead(self, toward):
-        print(self.actionTimer, " dead")
         if(self.state != 'dead'):
             self.state = 'dead'
             self.actionTimer = 0
@@ -253,7 +254,7 @@ class RenderPlayer(pygame.sprite.Sprite):
             if(toward is LEFT):
                 self.image = pygame.transform.flip(self.image, True, False)
             x, y = self.rect.center
-            self.rect.center = (x, y - 2 * toward)
+            self.rect.center = (x - 2 * toward, y)
             self.actionTimer += 1
             if(self.actionTimer > 6):
                 return True
@@ -265,7 +266,7 @@ class RenderPlayer(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
         name_width = self.name_img.get_size()[0]
         screen.blit(self.name_img, (self.rect.center[0] - round(name_width/2), self.rect.center[1] - 57))
-        screen.blit(self.effect.image, self.effect.rect)
+        # screen.blit(self.effect.image, self.effect.rect)
         self.hud(screen)
 
     

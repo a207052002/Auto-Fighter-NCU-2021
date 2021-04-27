@@ -72,21 +72,21 @@ def combatLogic(enemy, me):
     # "BBBRRRR" 遠離對手的方向跳遠後進行 4 格的普攻，風箏對手的概念
     # 以上含有 "R" 的就代表會攻擊，都可以自由加入 "A" 犧牲耗魔提高傷害
     # 請注意角色之間不能重疊，會強制落在前面一格，同時要注意被逼到角落時，要反過來利用很多 "F" 才能遠離對手
-    action = 0
+
     if(my_mp <= 80):
         action = 0
     else:
-        if(abs(enemy_pos - my_pos) < 4):
+        if(abs(enemy_pos - my_pos) < 3):
             if(my_pos <= 3 or my_pos >= 9):
-                action = "FFFFFRRRRRR"
+                action = "FFFFF"
             else:
-                action = "BBBBRRRRRR"
+                action = "BBBBB"
         elif(abs(enemy_pos - my_pos) <= 5 and my_mp <= 100):
             action = "RRRRR"
         elif(abs(enemy_pos - my_pos) <= 5):
             action = "RRRRRAAAA"
-        elif(abs(enemy_pos - my_pos) > 5):
-            action = "F"
+        else:
+            action = 0
 
     return action
 

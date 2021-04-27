@@ -69,13 +69,19 @@ class Effect(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(
             self.effects['wave'][self.actionTimer % 4], (64, 64))
         if(dx - sx < 0):
+            dx += 20
             self.image = pygame.transform.flip(self.image, True, False)
+        else:
+            dx -= 20
         if(self.actionTimer < 7):
-            self.rect.center = (sx + round((dx - sx)/6.3)
-                                * self.actionTimer, horizon)
+            size_x = int(self.image.get_size()[0]/2)
+            self.rect.center = (sx + round((dx - sx)/6)
+                                * self.actionTimer - size_x, horizon)
         if(self.actionTimer >= 7 and self.actionTimer < 9):
             self.image = pygame.transform.scale(
                 self.effects['wave'][self.actionTimer - 2], (64, 64))
+            if(dx - sx < 0):
+                self.image = pygame.transform.flip(self.image, True, False)
             self.actionTimer += 1
             return True
         elif(self.actionTimer >= 9):
@@ -132,7 +138,6 @@ class Effect(pygame.sprite.Sprite):
         rectSize = self.image.get_size()
         self.rect.center = self.certralize(self.standardCenter, rectSize)
         self.actionTimer += 1
-        print(self.actionTimer)
         if(self.actionTimer >= 100):
             return True
         return False

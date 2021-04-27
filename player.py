@@ -13,13 +13,17 @@ MP_PASSIVE_RATIO = 10/1
 ATK_RATIO_UNIT = 5
 MAX_ATTACK_RANGE = 6
 MAX_MOVE_RANGE = 6
-MAX_POS_EDGE = 12
+MAX_POS_EDGE = 16
 
 MAX_PASSIVES_NPC = 50
 MAX_PASSIVES_PLAYER = 30
 DEF_PARAMS = 660
 
 TEMP_MP = 30
+
+REG_MP_ACTION = 0
+USING_POWER_SHOT = 1
+USING_AVOID = 2
 
 # transform the result of skill to attribute
 
@@ -47,27 +51,33 @@ def calAtb(s: str, max_p):
 
 ''' you can simply "a" * n
 def rep(n, c):
-	res = ''
-	for i in range(n):
-		res += c
-	return res
+    res = ''
+    for i in range(n):
+        res += c
+    return res
 '''
 
 
 class skill():
-    def __init__(self, atk_count=0, forward=0, backward=0, atk_range=0, mp_reg=0):
+    def __init__(self, atk_count=0, forward=0, backward=0, atk_range=0, mp_reg=0, special=False, avoid=False):
         self.atk_ratio = 1 + (atk_count * ATK_RATIO_UNIT) / 100
         self.forward_move = forward - backward
         if(atk_range > MAX_ATTACK_RANGE):
             self.atk_range = MAX_ATTACK_RANGE
         else:
             self.atk_range = atk_range
-        self.mp_cost = atk_count * ATK_RATIO_UNIT * ATK_MP_RATIO + \
+        if(atk_range == 0):
+            atk_mp_offset = 0
+        else:
+            atk_mp_offset = 1
+        self.mp_cost = atk_count * ATK_RATIO_UNIT * ATK_MP_RATIO * atk_mp_offset + \
             abs(self.forward_move) * MOVE_MP_RATIO + \
             self.atk_range * ATK_RANGE_MP_RATIO
         self.mp_reg = mp_reg
-        print("inner mp cost: ", self.mp_cost)
         self.mp_cost += 10
+        if(special):
+            self.mp_cost = 0
+        self.avoid = avoid
 
 
 class attribute:
@@ -76,6 +86,8 @@ class attribute:
         self.mp = mp
         self.atk = atk
         self.dfs = dfs
+        self.max_hp = hp
+        self.max_mp = mp
 
     def show(self):
         print("hp: %d, mp: %d, atk: %d, dfs: %f" %
@@ -90,6 +102,15 @@ class player:
         self.__atb = attribute(3000, 300, 600, 300)
         self.__pos = p
         self.__max_passive = MAX_PASSIVES_PLAYER
+
+        self.avoid_buff = 0
+        self.power_shot = False
+
+        self.__special_actions = []
+        self.__special_actions.append(skill(0, 0, 0, 0, 25))
+        self.__special_actions.append(skill(100, 0, 0, 20, 0, True))
+        self.__special_actions.append(skill(0, 0, 0, 0, 0, True, True))
+
 
     def advanced(self):
         self.__max_passive = MAX_PASSIVES_NPC
@@ -116,6 +137,8 @@ class player:
         self.__atb.mp += attr.mp
         self.__atb.atk += attr.atk
         self.__atb.dfs += attr.dfs
+        self.__atb.max_hp = self.__atb.hp
+        self.__atb.max_mp = self.__atb.mp
 
     def setSkills(self, skill_str_arr):
         self.skill_set = []
@@ -150,29 +173,39 @@ class player:
         return move
 
     def action(self, enemy):
-        skill_num = self.combatLogic(copy.deepcopy(enemy), copy.deepcopy(self))
-        skill = self.skill_set[skill_num]
+        
+        skill_str = self.combatLogic(copy.deepcopy(enemy), copy.deepcopy(self))
+        intRet = isinstance(skill_str, int)
+        strRet = isinstance(skill_str, str)
+        assert intRet or strRet, "角色戰鬥邏輯回應了錯誤的類型，必須是字串或整數"
 
-        if(skill.mp_reg > 0):
-            self.__atb.mp += skill.mp_reg
+        if(intRet):
+            actionAttr = self.__special_actions[skill_str]
+        else:
+            actionAttr = calSkillAtb(skill_str)
 
-        mp_cost = skill.mp_cost
+        # skill = self.skill_set[skill_str]
+        actual_mp_reg = 0
+        if(actionAttr.mp_reg > 0):
+            actual_mp_reg = (actionAttr.mp_reg / 100) * self.__atb.max_mp
+            actual_mp_reg = int(actual_mp_reg)
+            self.__atb.mp += actual_mp_reg
+
+        mp_cost = actionAttr.mp_cost
 
         # Players have base 30 temporary mp every round
         if(mp_cost <= TEMP_MP):
             mp_cost = 0
         else:
             mp_cost -= TEMP_MP
-
         if(self.__atb.mp < mp_cost):
-            skill = self.skill_set[4]
-            mp_cost = 0
+            actionAttr = self.__special_actions[0]
 
-        atk_ratio = skill.atk_ratio
-        forward_move = skill.forward_move
-        atk_range = skill.atk_range
+        atk_ratio = actionAttr.atk_ratio
+        forward_move = actionAttr.forward_move
+        atk_range = actionAttr.atk_range
 
-        print("mp cost ", mp_cost)
+
         self.__atb.mp -= mp_cost
 
         # convert relative movement to absolute movement
@@ -180,12 +213,24 @@ class player:
             int(math.copysign(1, enemy.getPos() - self.getPos()))
         move = self.move(absolute_move, enemy)
         dmg = enemy.getHurt(self.getAtb(), self.getPos(), atk_ratio, atk_range)
-        return (atk_range, move, dmg, skill.mp_reg)
+        
+        self.buffExpire()
+        enemy.buffExpire()
+
+        return (atk_range, move, dmg, actual_mp_reg, enemy.avoid_buff)
+    
+    def buffExpire(self):
+        if(self.avoid_buff > 0):
+            self.avoid_buff -= 1
 
     # this will change the player's hp
     def getHurt(self, enemyAtb: attribute, enemyPos: int, atk_ratio: float, atk_range: int):
         print("HURT!")
         dmg = int(enemyAtb.atk * (atk_ratio + 0.5) * (1 - self.__atb.dfs /
                   DEF_PARAMS)) if(abs(enemyPos - self.__pos) <= atk_range) else 0
+                  
+        if(self.avoid_buff > 0):
+            dmg = 0
+
         self.__atb.hp -= dmg
         return dmg

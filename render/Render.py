@@ -26,8 +26,8 @@ class Render:
         # allsprite = pygame.sprite.Group()
         # clock = pygame.time.Clock()
         background = pygame.image.load('./render/background.png')
-        self.frameL = round(988/13)
-        self.xs = [round((988/13)*i + (988/13)/2)+18 for i in range(13)]
+        self.frameL = round(1003/17)
+        self.xs = [round((1003/17)*i + (1003/17)/2)+10 for i in range(17)]
         self.background = background.convert()
         self.scale = 2
         self.fixy = 480-50-25-32-16
@@ -36,7 +36,7 @@ class Render:
         self.ticks = 15
 
     
-    def render(self, players, atkRange, move, dmg, mp):
+    def render(self, players, atkRange, move, dmg, mp, avoid):
         pygame.display.update()
 
         if(abs(move) > 0):
@@ -82,6 +82,7 @@ class Render:
 
     def wholeAttack(self, player, atkRange, damage, oppose):
         finish = False
+        print(player.getPid(), " ATTACK", damage)
         while(not finish):
             pygame.event.get()
             self.screen.fill((0,0,0))
@@ -135,11 +136,11 @@ class Render:
             self.clock.tick(self.ticks)
 
     def attack(self, player, atk_range, damage, oppose):
-        injuring = False
         current_id = player.getPid()
+        oppose_id = oppose.getPid()
         current_x = self.players[current_id].getPos()[0]
-        oppose_x = self.players[(current_id+1)%2].getPos()[0]
-        hit = abs(atk_range * self.frameL) >= abs(oppose_x - current_x)
+        oppose_x = self.players[oppose_id].getPos()[0]
+        hit = abs(atk_range * self.frameL) >= abs(oppose_x - current_x)-5
         self.updateStatus(player)
         if(not hit):
             damage = 0
@@ -154,19 +155,16 @@ class Render:
                 state = self.players[current_id].rangedAttack(oppose_x, current_x, toward)
             else:
                 state = self.players[current_id].rangedAttack(current_x + toward * atk_range * self.frameL, current_x, toward)
-        if(state >= 1):
-            if(damage > 0):
-                self.players[(current_id+1)%2].injure(damage, toward*(-1))
+        if(damage > 0):
+            if(state == 1):
+                self.players[oppose_id].injure(damage, toward*(-1))
                 self.updateStatus(oppose)
-            if(state == 2 and damage > 0):
-                injuring = True
-                return True and self.players[(current_id+1)%2].injure(damage, toward*(-1))
             elif(state == 2):
-                if(not injuring):
-                    self.players[(current_id+1)%2].idle(toward*(-1))
+                return True and self.players[oppose_id].injure(damage, toward*(-1))
+        else:
+            self.players[oppose_id].idle(toward*(-1))
+            if(state == 2):
                 return True
-        if(not injuring):
-            self.players[(current_id+1)%2].idle(toward*(-1))
         return False
 
     def wholeMp(self, player, mp, oppose):
@@ -215,3 +213,5 @@ class Render:
     def draw(self):
         for p in self.players:
             p.draw(self.screen)
+        for p in self.players:
+            self.screen.blit(p.effect.image, p.effect.rect)
