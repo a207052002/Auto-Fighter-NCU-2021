@@ -39,7 +39,7 @@ def skill_set():
 
     # NPC 電腦的
     # 如 "RA" 就是一格的普攻，"RRA" 就是兩格的普攻，"RRAA" 就是兩格又痛一點點的普攻
-    skill_set_str = ["RRRRA", "A" * 500 + "R", "FF", "BB"]
+    skill_set_str = ["RRRRRA", "A" * 100 + "RRRRR", "ARRRRRBBBB", "ARRRRRFFFFF"]
 
     return skill_set_str
 
@@ -66,15 +66,23 @@ def combatLogic(enemy, me):
     enemy_pos = enemy.getPos()
 
     # 以下可以開始自由修改與決定你的 AI，上面幫你取好的資訊請盡量不要去動
-    if(abs(enemy_pos - my_pos) < 2):
-        if(my_hp < 2000):
-            skill_number = 3
-        else:
+    # 0 - 3 是你的技能
+    # 4 是一般攻擊，不消耗 mp
+    # 5 冥想回 mp
+    if(my_mp <= 80):
+        skill_number = 5
+    else:
+        if(abs(enemy_pos - my_pos) < 3):
+            if(my_pos <= 3 or my_pos >= 9):
+                skill_number = 3
+            else:
+                skill_number = 2
+        elif(abs(enemy_pos - my_pos) <= 5 and my_mp <= 100):
+            skill_number = 0
+        elif(abs(enemy_pos - my_pos) <= 5):
             skill_number = 1
-    elif(abs(enemy_pos - my_pos) > 4):
-        skill_number = 2
-    elif(abs(enemy_pos - my_pos) >= 2):
-        skill_number = 0
+        else:
+            skill_number = 5
 
     # 這邊決定你要使用的技能編號，0-3 選一個。如果不在 0-3 內會視為普攻
     return skill_number

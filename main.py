@@ -7,6 +7,8 @@ from player import *
 import leftplayer
 import rightplayer
 import standardNPC
+import advanceNPC
+import kitting
 
 # import player
 
@@ -17,22 +19,24 @@ def round(p1, p2, atkRange, move, dmg):
 
 
 def build():
-    pos1, pos2 = random.randint(0, 5), random.randint(7, 12)
+    pos1, pos2 = (0, 12)
+    # pos1, pos2 = random.randint(0, 5), random.randint(7, 12)
     return [player(pos1, 0), player(pos2, 1)]
 
 
 if(__name__ == '__main__'):
     p1, p2 = build()
-    p1.setPassives(leftplayer.passive())
-    p1.setSkills(leftplayer.skill_set())
-    p1.setActionLambda(leftplayer.combatLogic)
-    p1.setName(leftplayer.name())
+    p1.setPassives(kitting.passive())
+    p1.setSkills(kitting.skill_set())
+    p1.setActionLambda(kitting.combatLogic)
+    p1.setName(kitting.name())
 
-    p2.setPassives(standardNPC.passive())
-    p2.setSkills(standardNPC.skill_set())
-    p2.setActionLambda(standardNPC.combatLogic)
-    p2.setName(standardNPC.name())
-    p2.cheat()
+    p2.advanced()
+    p2.setPassives(advanceNPC.passive())
+    p2.setSkills(advanceNPC.skill_set())
+    p2.setActionLambda(advanceNPC.combatLogic)
+    p2.setName(advanceNPC.name())
+    # p2.cheat()
     renderer = Render()
     renderer.startup([p1, p2])
 

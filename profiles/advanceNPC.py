@@ -10,12 +10,12 @@ def passive():
     # "H" 代表分配 1 點給 HP，每點 + 100 HP
     # "D" 代表分配 1 點給 dfs，每點 + 10 dfs(防禦減傷率算法為 (dfs/660))
     # "A" 代表分配 1 點給 atk，每點 + 80 atk(傷害算法為 80*技能倍率*(1-dfs/660))
-    # "M" 代表分配 1 點給 mp，每點 + 10 mp(mp 越多可以開越強的技能)
+    # "M" 代表分配 1 點給 mp，每點 + 100 mp(mp 越多可以開越強的技能)
     # 以下為簡單的範例
     # 字母順序不影響效果呈現，我們只會數對應的字母數量有多少
     # 未滿 30 或是前 30 個內有規格外字母，就代表你放棄了這些天賦點
 
-    passive_str = "H" * 20 + "D" * 0 + "A" * 5 + "M" * 5
+    passive_str = "H" * 20 + "D" * 30 + "A" * 0 + "M" * 0
     return passive_str
 
 def skill_set():
@@ -39,7 +39,7 @@ def skill_set():
 
     # NPC 電腦的
     # 如 "RA" 就是一格的普攻，"RRA" 就是兩格的普攻，"RRAA" 就是兩格又痛一點點的普攻
-    skill_set_str = ["RRRRA", "A" * 500 + "R", "FF", "BB"]
+    skill_set_str = ["RA", "F", "FFRA", "F"]
 
     return skill_set_str
 
@@ -65,21 +65,21 @@ def combatLogic(enemy, me):
     my_pos = me.getPos()
     enemy_pos = enemy.getPos()
 
-    # 以下可以開始自由修改與決定你的 AI，上面幫你取好的資訊請盡量不要去動
-    if(abs(enemy_pos - my_pos) < 2):
-        if(my_hp < 2000):
-            skill_number = 3
-        else:
-            skill_number = 1
-    elif(abs(enemy_pos - my_pos) > 4):
+    # 愚蠢的 NPC，只會一直往玩家走去並且不使用 MP 普攻
+    skill_number = -1
+
+    if(abs(enemy_pos - my_pos) > 2):
         skill_number = 2
-    elif(abs(enemy_pos - my_pos) >= 2):
+    elif(abs(enemy_pos - my_pos) > 1):
+        skill_number = 1
+    else:
         skill_number = 0
 
     # 這邊決定你要使用的技能編號，0-3 選一個。如果不在 0-3 內會視為普攻
+
     return skill_number
 
 def name():
     # 取個煞氣的名字吧，會顯示在角色上方
-    name = "欸欸欸名字可以自己取欸"
+    name = "廢物 NPC"
     return name
