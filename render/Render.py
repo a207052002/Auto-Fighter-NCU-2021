@@ -72,8 +72,7 @@ class Render:
         finish = False
         while(not finish):
             pygame.event.get()
-            self.screen.fill((0,0,0))
-            self.screen.blit(self.background, [0,50])
+            self.drawBackground()
             self.clock.tick(self.ticks)
             finish = loser.dead(toward)
             self.draw()
@@ -81,20 +80,22 @@ class Render:
         self.reset()
         self.win(player.getName())
 
-    def wholeMove(self, player, pos):
+    def wholeMove(self, player, pos, eventmap):
         self.updateStatus(player)
         player_id = player.getPid()
         finish = False
         while(not finish):
             pygame.event.get()
-            self.screen.fill((0,0,0))
-            self.screen.blit(self.background, [0,50])
+            self.drawBackground()
             self.clock.tick(self.ticks)
             finish = self.move(player_id, pos)
             self.draw()
             pygame.display.update()
-        #if(self.eventmap[pos] is 1):
-        #elif(self.eventmap[pos] is 2):
+        if(self.eventmap[pos] is 1):
+            self.players[player.getPid()].power_shot_ready = True
+        elif(self.eventmap[pos] is 2):
+            self.players[player.getPid()].avoid_ready = True
+        self.eventmap = eventmap
         self.reset()
 
     def wholeAttack(self, player, atkRange, damage, oppose):
@@ -102,8 +103,7 @@ class Render:
         print(player.getPid(), " ATTACK", damage)
         while(not finish):
             pygame.event.get()
-            self.screen.fill((0,0,0))
-            self.screen.blit(self.background, [0,50])
+            self.drawBackground()
             self.clock.tick(self.ticks)
             finish = self.attack(player, atkRange, damage, oppose)
             self.draw()
@@ -146,8 +146,7 @@ class Render:
         finish = False
         while(not finish):
             finish = fight_effect.fight()
-            self.screen.fill((0,0,0))
-            self.screen.blit(self.background, [0,50])
+            self.drawBackground()
             self.draw()
             fight_effect.draw(self.screen)
             pygame.display.update()
@@ -196,8 +195,7 @@ class Render:
             toward = LEFT
         while(not finish):
             pygame.event.get()
-            self.screen.fill((0,0,0))
-            self.screen.blit(self.background, [0,50])
+            self.drawBackground()
             self.clock.tick(self.ticks)
             finish = self.players[current_id].meditate(toward, mp)
             self.players[(current_id+1)%2].idle(toward*(-1))
@@ -221,16 +219,18 @@ class Render:
         finish = False
         while(not finish):
             finish = win_effect.win()
-            self.screen.fill((0,0,0))
-            self.screen.blit(self.background, [0,50])
+            self.drawBackground()
             self.draw()
             win_effect.draw(self.screen)
             pygame.display.update()
             self.clock.tick(self.ticks)
 
-    def drawBackground(self, mapinfo):
+    def drawBackground(self):
         self.screen.fill((0,0,0))
         self.screen.blit(self.background, [0,50])
+        for idx, p in enumerate(self.eventmap):
+            self.mapEventEffect[idx].setEventState(p)
+            self.mapEventEffect[idx].selfBlit(self.screen)
 
     def draw(self):
         for p in self.players:
