@@ -1,17 +1,13 @@
 import sys
-
-sys.path.append('./profiles')
 import random
 
-import advanceTankNPC
-import kitting
-import leftplayer
-import rightplayer
-import standardNPC
-
 from player import *
+#from profiles import kitting
+#from profiles import advanceTankNPC
+from profiles import *
 from render import Render
 from eventmap import *
+
 
 MAX_POS = 16
 
@@ -52,29 +48,29 @@ if(__name__ == '__main__'):
     finish = False
 
     while(not finish):
-        if(random.randint(0,2) == 0 or True):
+        if(random.randint(0,2) == 0):
             eventmap.generateEvent([p1.getPos(), p2.getPos()])
             renderer.mapEventSet(eventmap.getEventMap())
 
-        (atk_range, move, dmg, mp, avoid, triggerevent) = p1.action(p2, eventmap)
+        (atk_range, move, dmg, mp, avoid, trigger_event) = p1.action(p2, eventmap)
         round(p1, p2, atk_range, move, dmg)
         print(p1.getPos(), p2.getPos())
 
-        renderer.render([p1, p2], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), triggerevent)
+        renderer.render([p1, p2], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
 
         if(finish):
             break
 
-        if(random.randint(0,2) == 0 or True):
+        if(random.randint(0,2) == 0):
             eventmap.generateEvent([p1.getPos(), p2.getPos()])
             renderer.mapEventSet(eventmap.getEventMap())
 
-        (atk_range, move, dmg, mp, avoid, triggerevent) = p2.action(p1, eventmap)
+        (atk_range, move, dmg, mp, avoid, trigger_event) = p2.action(p1, eventmap)
         round(p1, p2, atk_range, move, dmg)
         print(p1.getPos(), p2.getPos())
-        renderer.render([p2, p1], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), triggerevent)
+        renderer.render([p2, p1], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
 

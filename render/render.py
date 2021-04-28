@@ -37,6 +37,7 @@ class Render:
         self.clock = pygame.time.Clock()
         self.ticks = 15
         self.mapEventEffect = []
+        self.globalEffect = Effect()
 
         for xcoor in self.xs:
             effect = Effect()
@@ -47,21 +48,29 @@ class Render:
     def switchEvent(self, pos, state):
         self.mapEventEffect[pos].setEventState(state)
 
-    def render(self, players, atkRange, move, dmg, mp, avoid, eventmap, triggeravoid):
+    def render(self, players, atkRange, move, dmg, mp, avoid, eventmap, trigger_event):
         pygame.display.update()
 
-        self.triggeravoid = triggeravoid
+        self.trigger_event = trigger_event
         self.turn = players[0]
         self.oppose_avoid = avoid
 
         if(abs(move) > 0):
             self.wholeMove(players[0], players[0].getPos(), eventmap)
+            if(trigger_event == 3):
+                print("heal HP")
+                self.recover(trigger_event, players[0].getPid())
+            if(trigger_event == 4):
+                print("heal MP")
+                self.recover(trigger_event, players[0].getPid())
         if(atkRange > 0):
             self.wholeAttack(players[0], atkRange, dmg, players[1])
         if(mp > 0):
             self.wholeMp(players[0], mp, players[1])
-        if(triggeravoid):
+
+        if(trigger_event == 2):
             self.triggerAvoid(players[0])
+
             
         return True
 
@@ -135,7 +144,6 @@ class Render:
         self.players[player.getPid()].mp = player.getAtb().mp
         self.players[player.getPid()].power_shot_ready = player.power_shot
         self.players[player.getPid()].avoid_ready = player.avoid
-        self.players[player.getPid()].avoid_buff = player.avoid_buff
         self.players[player.getPid()].avoid_buff = player.avoid_buff
 
     def move(self, player, pos):
@@ -269,9 +277,27 @@ class Render:
         for idx, p in enumerate(self.eventmap):
             self.mapEventEffect[idx].setEventState(p)
             self.mapEventEffect[idx].selfBlit(self.screen)
+    
+    def recover(self, type, player_id):
+        current_pos = self.players[player_id].getPos()
+        oppose_pos = self.players[(player_id+1)%2].getPos()
+        if(oppose_pos > current_pos):
+            toward = RIGHT
+        else:
+            toward = LEFT
+
+        finish = False
+        while(not finish):
+            self.drawBackground()
+            self.draw()
+            finish = self.players[player_id].heal(type, toward)
+            pygame.display.update()
+            self.clock.tick(self.ticks)
+        self.players[player_id].heal_effect.reset()
 
     def draw(self):
         for p in self.players:
             p.draw(self.screen)
         for p in self.players:
             self.screen.blit(p.effect.image, p.effect.rect)
+            self.screen.blit(p.heal_effect.image, p.heal_effect.rect)

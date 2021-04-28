@@ -55,6 +55,7 @@ class RenderPlayer(pygame.sprite.Sprite):
         self.power_shot_effect = Effect()
         self.avoid_effect = Effect()
         self.avoid_buff_effect = Effect()
+        self.heal_effect = Effect()
         self.power_shot_ready = False
         self.avoid_ready = False
         self.avoid_buff = 0
@@ -203,7 +204,30 @@ class RenderPlayer(pygame.sprite.Sprite):
         return False
 
             
-    
+    def heal(self, type, toward):
+        if(self.state != 'heal'):
+            if(type == 3):
+                self.effect.reset()
+                self.effect.setDamage(int(self.max_hp*0.2), True)
+                self.effect.DoDamage(self.rect.center[0], self.rect.center[1] - 100)
+            else:
+                self.effect.reset()
+                self.effect.setMPreg(int(self.max_mp*0.2))
+                self.effect.doMP(self.rect.center[0], self.rect.center[1] - 100)
+            self.state = 'heal'
+            self.actionTimer = 0
+            self.updateImg('idle', self.actionTimer%4, toward)
+            self.actionTimer += 1
+        else:
+            if(type == 3):
+                healed = self.effect.DoDamage(self.rect.center[0], self.rect.center[1] - 100)
+            else:
+                healed = self.effect.doMP(self.rect.center[0], self.rect.center[1] - 100)
+            self.updateImg('idle', self.actionTimer%4, toward)
+            self.actionTimer += 1
+            return self.heal_effect.doHeal(type, self.rect.center[0], self.horizon) and healed
+        return False
+
     def injure(self, damage, toward):
         
         if(self.state != 'injure'):

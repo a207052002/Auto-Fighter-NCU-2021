@@ -177,12 +177,20 @@ class player:
         self.__pos += move
 
         mapinfo = event_map.getEventMap()
-        if(mapinfo[self.__pos] is 1):
+        if(mapinfo[self.__pos] == 1):
             self.power_shot = True
             event_map.clearEvent(self.__pos)
-        elif(mapinfo[self.__pos] is 2):
+        elif(mapinfo[self.__pos] == 2):
             self.avoid = True
             event_map.clearEvent(self.__pos)
+        elif(mapinfo[self.__pos] == 3):
+            self.__atb.hp += int(self.__atb.max_hp * 0.2)
+            event_map.clearEvent(self.__pos)
+        elif(mapinfo[self.__pos] == 4):
+            self.__atb.mp += int(self.__atb.max_mp * 0.2)
+            event_map.clearEvent(self.__pos)
+        
+        self.trigger_event = mapinfo[self.__pos]
 
         return move
 
@@ -192,7 +200,7 @@ class player:
         intRet = isinstance(skill_str, int)
         strRet = isinstance(skill_str, str)
         assert intRet or strRet, "角色戰鬥邏輯回應了錯誤的類型，必須是字串或整數"
-        trigger_avoid = False
+        self.trigger_event = 0
         if(intRet):
             if(skill_str is 1 and self.power_shot):
                 print("select power shot")
@@ -201,7 +209,6 @@ class player:
             elif(skill_str is 2 and self.avoid):
                 actionAttr = self.__special_actions[skill_str]
                 self.avoid = False
-                trigger_avoid = True
             else:
                 actionAttr = self.__special_actions[0]
         else:
@@ -241,7 +248,7 @@ class player:
         dmg = enemy.getHurt(self.getAtb(), self.getPos(), atk_ratio, atk_range)
         
         print("atk range: ", atk_range, ", dmg: ", dmg)
-        return (atk_range, move, dmg, actual_mp_reg, enemy.avoid_buff, trigger_avoid)
+        return (atk_range, move, dmg, actual_mp_reg, enemy.avoid_buff, self.trigger_event)
     
     def buffExpire(self):
         if(self.avoid_buff > 0):

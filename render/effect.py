@@ -33,12 +33,25 @@ class Effect(pygame.sprite.Sprite):
         self.effects['power_wave'] = tmp.copy()
         self.effects['avoid_event'] = pygame.image.load('./render/resource/avoid_event.png').convert_alpha()
         self.effects['avoid_event'] = pygame.transform.scale(
-                self.effects['avoid_event'], (45, 40))
+                self.effects['avoid_event'], (30, 30))
 
         self.effects['power_event'] = pygame.image.load('./render/resource/power_event.png').convert_alpha()
         self.effects['power_event'] = pygame.transform.scale(
-                self.effects['power_event'], (45, 40))
+                self.effects['power_event'], (30, 30))
         self.effects['using_avoid'] = pygame.image.load('./render/resource/power_event_using.png').convert_alpha()
+        self.effects['heart'] = pygame.image.load('./render/resource/heart.png').convert_alpha()
+        self.effects['heart'] = pygame.transform.scale(
+                self.effects['heart'], (30, 30))
+        mpss = SpriteSheet('./render/resource/potions.png')
+        self.effects['mp'] = mpss.load_strip((0, 16*5+1, 16, 16), 10)[8]
+        self.effects['mp'] = pygame.transform.scale(
+                self.effects['mp'], (30, 30))
+        healingss = SpriteSheet('./render/resource/teleporter_hit.png')
+        healling_effect = []
+        for idx in range(8):
+            tmp = healingss.load_strip((0, 128*idx, 128, 128), 1)[0]
+            healling_effect.append(tmp)
+        self.effects['heal'] = healling_effect
 
         self.image = pygame.Surface([10, 10], pygame.SRCALPHA)
         self.rect = self.image.get_rect()
@@ -125,8 +138,11 @@ class Effect(pygame.sprite.Sprite):
 
 
 
-    def setDamage(self, damage):
-        surface, rect = self.font.render(str(damage), (255, 0, 0))
+    def setDamage(self, damage, heal=False):
+        if(heal):
+            surface, rect = self.font.render(str(damage), (40, 255, 0))
+        else:
+            surface, rect = self.font.render(str(damage), (255, 0, 0))
         self.damage = surface.convert_alpha()
 
     def DoDamage(self, x, y):
@@ -156,6 +172,18 @@ class Effect(pygame.sprite.Sprite):
             return False
         else:
             return True
+
+    def doHeal(self, type, x, y):
+        if(self.actionTimer > 6):
+            return True
+        else:
+            self.image = self.effects['heal'][self.actionTimer+1]
+        if(type == 3):
+            self.image.fill((90, 220, 50, 255), None, pygame.BLEND_RGBA_MULT)
+        size_x, size_y = self.image.get_size()
+        self.rect.center = (x - int(size_x/2) + 5, y - 60)
+        self.actionTimer += 1
+        return False
 
     def setWinner(self, name, x, y):
         self.standardCenter = (x, y)
@@ -221,20 +249,24 @@ class Effect(pygame.sprite.Sprite):
         return False
 
     def setEvent(self, x, y, event):
-        size_x, size_y = 56, 50
+        size_x, size_y = 30, 30
         if(event is 1):
             self.image = self.effects['power_event']
         elif(event is 2):
             self.image = self.effects['avoid_event']
         else:
             self.image = pygame.Surface([56, 50], pygame.SRCALPHA)
-        self.rect.center = (x - int(size_x/2), y + 25)
+        self.rect.center = (x - int(size_x/2), y + 35)
 
     def setEventState(self, event):
-        if(event is 1):
+        if(event == 1):
             self.image = self.effects['power_event']
-        elif(event is 2):
+        elif(event == 2):
             self.image = self.effects['avoid_event']
+        elif(event == 3):
+            self.image = self.effects['heart']
+        elif(event == 4):
+            self.image = self.effects['mp']
         else:
             self.image = pygame.Surface([56, 50], pygame.SRCALPHA)
     def setStatusEvent(self, event, x, y):
@@ -246,7 +278,7 @@ class Effect(pygame.sprite.Sprite):
         elif(event == 3):
             self.image = self.effects['using_avoid']
 
-        self.image = pygame.transform.scale(self.image, (25, 21))
+        self.image = pygame.transform.scale(self.image, (25, 25))
         (size_x, size_y) = self.image.get_size()
         self.rect.center = (x - int(size_x/2), y - int(size_y/2))
     
