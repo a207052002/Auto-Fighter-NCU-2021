@@ -42,7 +42,7 @@ def action_set():
 
     return action_set_str
 
-def combatLogic(enemy, me):
+def combatLogic(enemy, me, eventmap):
     # 決定你的角色的自動戰鬥邏輯
     # 我們會幫你把你必須知道的資訊都先放進對應的變數，你們可以參考該變數來決定角色該怎麼動
     

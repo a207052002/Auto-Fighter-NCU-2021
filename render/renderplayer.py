@@ -48,6 +48,11 @@ class RenderPlayer(pygame.sprite.Sprite):
         self.font = pygame.freetype.Font('./render/resource/TaipeiSansTCBeta-Bold.ttf', 16)
         self.effect = Effect()
 
+        self.power_shot_effect = Effect()
+        self.avoid_effect = Effect()
+        self.power_shot_ready = False
+        self.avoid_ready = False
+
         for k, v in self.images.items():
             for idx, img in enumerate(v):
                 self.images[k][idx] = pygame.transform.scale(img, (64*scale, 64* scale))
@@ -240,7 +245,17 @@ class RenderPlayer(pygame.sprite.Sprite):
         # hp
         pygame.draw.rect(self.bar, (255, 0, 0), pygame.Rect(0, 0, hp_len, width))
         pygame.draw.rect(self.bar, (0, 0, 255), pygame.Rect(0, width+1, mp_len, width))
+
+        if(self.power_shot_ready):
+            self.power_shot_ready.setStatusEvent(1, pos[0] + 10, pos[1] - 40)
+            self.power_shot_ready.selfBlit(screen)
+        if(self.avoid_ready):
+            self.avoid_ready.setStatusEvent(2, pos[0] + 32, pos[1] - 40)
+            self.avoid_ready.selfBlit(screen)
+
         screen.blit(self.bar, pos)
+        
+
     def dead(self, toward):
         if(self.state != 'dead'):
             self.state = 'dead'

@@ -11,6 +11,7 @@ import standardNPC
 
 from player import *
 from render import Render
+from eventmap import *
 
 MAX_POS = 16
 
@@ -26,6 +27,7 @@ def build():
 
 
 if(__name__ == '__main__'):
+    eventmap = Eventmap()
     p1, p2 = build()
     p1.setPassives(kitting.passive())
     p1.setActionLambda(kitting.combatLogic)
@@ -49,20 +51,26 @@ if(__name__ == '__main__'):
     finish = False
 
     while(not finish):
-        (atk_range, move, dmg, mp, avoid) = p1.action(p2)
+        if(random.randint(0,3) == 0):
+            eventmap.generateEvent([p1.getPos, p2.getPos])
+
+        (atk_range, move, dmg, mp, avoid, triggerevent) = p1.action(p2, eventmap)
         round(p1, p2, atk_range, move, dmg)
         print(p1.getPos(), p2.getPos())
-        renderer.render([p1, p2], atk_range, move, dmg, mp, avoid)
+        renderer.render([p1, p2], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), triggerevent)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
 
         if(finish):
             break
 
-        (atk_range, move, dmg, mp, avoid) = p2.action(p1)
+        if(random.randint(0,3) == 0):
+            eventmap.generateEvent([p1.getPos, p2.getPos])
+
+        (atk_range, move, dmg, mp, avoid, triggerevent) = p2.action(p1, eventmap)
         round(p1, p2, atk_range, move, dmg)
         print(p1.getPos(), p2.getPos())
-        renderer.render([p2, p1], atk_range, move, dmg, mp, avoid)
+        renderer.render([p2, p1], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), triggerevent)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
 

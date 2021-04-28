@@ -22,6 +22,15 @@ class Effect(pygame.sprite.Sprite):
         tmp = []
         for p in self.effects['wave']:
             tmp.append(pygame.transform.scale(p, (79, 79)))
+
+        self.effects['avoid_event'] = pygame.image.load('./render/resource/avoid_event.png').convert_alpha()
+        self.effects['avoid_event'] = pygame.transform.scale(
+                self.effects['avoid_event'], (56, 50))
+
+        self.effects['power_event'] = pygame.image.load('./render/resource/power_event.png').convert_alpha()
+        self.effects['power_event'] = pygame.transform.scale(
+                self.effects['power_event'], (56, 50))
+
         self.effects['wave'] = tmp
         self.image = pygame.Surface([10, 10], pygame.SRCALPHA)
         self.rect = self.image.get_rect()
@@ -35,7 +44,7 @@ class Effect(pygame.sprite.Sprite):
         else:
             self.image = self.effect[kind][index]
             if(toward is 0):
-                self.image = pygame.transform.flip(image, True, False)
+                self.image = pygame.transform.flip(self.image, True, False)
             self.image = pygame.transform.scale(
                 self.image, tuple(np.array(self.image.get_size()) * scale))
             self.rect = self.image.get_rect()
@@ -184,3 +193,34 @@ class Effect(pygame.sprite.Sprite):
             return True
         self.actionTimer += 1
         return False
+
+    def setEvent(self, x, y, event):
+        size_x, size_y = 56, 50
+        if(event is 1):
+            self.image = self.effects['power_event']
+        elif(event is 2):
+            self.image = self.effects['avoid_event']
+        else:
+            self.image = pygame.Surface([56, 50], pygame.SRCALPHA)
+        self.rect.center = (x - int(size_x/2), y - int(size_y/2))
+
+    def setEventState(self, event):
+        if(event is 1):
+            self.image = self.effects['power_event']
+        elif(event is 2):
+            self.image = self.effects['avoid_event']
+        else:
+            self.image = pygame.Surface([56, 50], pygame.SRCALPHA)
+
+    def setStatusEvent(self, event, x, y):
+        if(event is 1):
+            self.image = self.effects['power_event']
+        elif(event is 2):
+            self.image = self.effects['avoid_event']
+
+        self.image = pygame.transform.scale(self.image, (17, 15))
+        (size_x, size_y) = self.image.get_size()
+        self.rect.center = (x - int(size_x/2), y - int(size_y/2))
+    
+    def selfBlit(self, screen):
+        screen.blit(self.image, self.rect)

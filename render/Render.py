@@ -31,16 +31,31 @@ class Render:
         self.background = background.convert()
         self.scale = 2
         self.fixy = 480-50-25-32-16
+        self.eventy = self.fixy - 20
         self.screen.blit(self.background, [0,50])
         self.clock = pygame.time.Clock()
         self.ticks = 15
+        self.mapEventEffect = []
 
-    
-    def render(self, players, atkRange, move, dmg, mp, avoid):
+        for xcoor in self.xs:
+            effect = Effect()
+            effect.setEvent(xcoor, self.eventy, 0)
+            self.mapEventEffect.append(effect)
+
+
+    def switchEvent(self, pos, state):
+        self.mapEventEffect[pos].setEventState(state)
+
+    def render(self, players, atkRange, move, dmg, mp, avoid, eventmap, triggerevent):
         pygame.display.update()
 
+        self.eventmap = eventmap
+        self.triggerevent = triggerevent
+        self.turn = players[0]
+        self.oppose_avoid = avoid
+
         if(abs(move) > 0):
-            self.wholeMove(players[0], players[0].getPos())
+            self.wholeMove(players[0], players[0].getPos(), eventmap)
         if(atkRange > 0):
             self.wholeAttack(players[0], atkRange, dmg, players[1])
         if(mp > 0):
@@ -78,6 +93,8 @@ class Render:
             finish = self.move(player_id, pos)
             self.draw()
             pygame.display.update()
+        #if(self.eventmap[pos] is 1):
+        #elif(self.eventmap[pos] is 2):
         self.reset()
 
     def wholeAttack(self, player, atkRange, damage, oppose):
@@ -91,6 +108,7 @@ class Render:
             finish = self.attack(player, atkRange, damage, oppose)
             self.draw()
             pygame.display.update()
+        self.eventmap.getEventMap()
         self.reset()
 
     def startup(self, players):
@@ -209,6 +227,10 @@ class Render:
             win_effect.draw(self.screen)
             pygame.display.update()
             self.clock.tick(self.ticks)
+
+    def drawBackground(self, mapinfo):
+        self.screen.fill((0,0,0))
+        self.screen.blit(self.background, [0,50])
 
     def draw(self):
         for p in self.players:

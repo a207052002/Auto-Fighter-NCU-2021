@@ -25,6 +25,8 @@ REG_MP_ACTION = 0
 USING_POWER_SHOT = 1
 USING_AVOID = 2
 
+AVOID_ROUND = 2
+
 # transform the result of skill to attribute
 
 
@@ -105,6 +107,7 @@ class player:
 
         self.avoid_buff = 0
         self.power_shot = False
+        self.avoid = False
 
         self.__special_actions = []
         self.__special_actions.append(skill(0, 0, 0, 0, 25))
@@ -140,6 +143,7 @@ class player:
         self.__atb.max_hp = self.__atb.hp
         self.__atb.max_mp = self.__atb.mp
 
+    ''' canceled
     def setSkills(self, skill_str_arr):
         self.skill_set = []
         if(len(skill_str_arr) <= 4):
@@ -149,6 +153,7 @@ class player:
         # 5th skill is default attack
         self.skill_set.append(calSkillAtb("RA"))
         self.skill_set.append(skill(mp_reg=30))
+    '''
 
     def setActionLambda(self, combatLogic):
         self.combatLogic = combatLogic
@@ -156,7 +161,7 @@ class player:
     def setName(self, name):
         self.__name = name
 
-    def move(self, move, enemy):
+    def move(self, move, enemy, event_map):
         # limitation and edge inspection
         if(abs(move) > MAX_MOVE_RANGE):
             move -= int(math.copysign(MAX_MOVE_RANGE - abs(move), move))
@@ -170,17 +175,31 @@ class player:
         if(enemyPos == self.__pos + move):
             move -= int(math.copysign(1, move))
         self.__pos += move
+
+        mapinfo = event_map.getEventMap()
+        if(mapinfo[self.__pos] is 1):
+            self.power_shot = True
+            event_map.clearEvent(self.__pos)
+        elif(mapinfo[self.__pos] is 2):
+            self.avoid = True
+            event_map.clearEvent(self.__pos)
+
         return move
 
-    def action(self, enemy):
+    def action(self, enemy, event_map):
         
-        skill_str = self.combatLogic(copy.deepcopy(enemy), copy.deepcopy(self))
+        skill_str = self.combatLogic(copy.deepcopy(enemy), copy.deepcopy(self), event_map.getEventMap())
         intRet = isinstance(skill_str, int)
         strRet = isinstance(skill_str, str)
         assert intRet or strRet, "角色戰鬥邏輯回應了錯誤的類型，必須是字串或整數"
 
         if(intRet):
-            actionAttr = self.__special_actions[skill_str]
+            if(skill_str is 1 and self.power_shot):
+                actionAttr = self.__special_actions[skill_str]
+            elif(skill_str is 2 and self.avoid):
+                actionAttr = self.__special_actions[skill_str]
+            else:
+                actionAttr = self.__special_actions[0]
         else:
             actionAttr = calSkillAtb(skill_str)
 
@@ -205,13 +224,15 @@ class player:
         forward_move = actionAttr.forward_move
         atk_range = actionAttr.atk_range
 
+        if(actionAttr.avoid):
+            self.avoid_buff = AVOID_ROUND
 
         self.__atb.mp -= mp_cost
 
         # convert relative movement to absolute movement
         absolute_move = forward_move * \
             int(math.copysign(1, enemy.getPos() - self.getPos()))
-        move = self.move(absolute_move, enemy)
+        move = self.move(absolute_move, enemy, event_map)
         dmg = enemy.getHurt(self.getAtb(), self.getPos(), atk_ratio, atk_range)
         
         self.buffExpire()

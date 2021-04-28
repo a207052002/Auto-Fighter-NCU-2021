@@ -18,7 +18,7 @@ def passive():
     passive_str = "H" * 20 + "D" * 0 + "A" * 5 + "M" * 5
     return passive_str
 
-def combatLogic(enemy, me):
+def combatLogic(enemy, me, eventmap):
     # 決定你的角色的自動戰鬥邏輯
     # 我們會幫你把你必須知道的資訊都先放進對應的變數，你們可以參考該變數來決定角色該怎麼動
     
