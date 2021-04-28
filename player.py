@@ -25,7 +25,7 @@ REG_MP_ACTION = 0
 USING_POWER_SHOT = 1
 USING_AVOID = 2
 
-AVOID_ROUND = 2
+AVOID_ROUND = 4
 
 # transform the result of skill to attribute
 
@@ -64,7 +64,7 @@ class skill():
     def __init__(self, atk_count=0, forward=0, backward=0, atk_range=0, mp_reg=0, special=False, avoid=False):
         self.atk_ratio = 1 + (atk_count * ATK_RATIO_UNIT) / 100
         self.forward_move = forward - backward
-        if(atk_range > MAX_ATTACK_RANGE):
+        if(atk_range > MAX_ATTACK_RANGE and not special):
             self.atk_range = MAX_ATTACK_RANGE
         else:
             self.atk_range = atk_range
@@ -111,7 +111,7 @@ class player:
 
         self.__special_actions = []
         self.__special_actions.append(skill(0, 0, 0, 0, 25))
-        self.__special_actions.append(skill(100, 0, 0, 20, 0, True))
+        self.__special_actions.append(skill(400, 0, 0, 25, 0, True))
         self.__special_actions.append(skill(0, 0, 0, 0, 0, True, True))
 
 
@@ -192,12 +192,16 @@ class player:
         intRet = isinstance(skill_str, int)
         strRet = isinstance(skill_str, str)
         assert intRet or strRet, "角色戰鬥邏輯回應了錯誤的類型，必須是字串或整數"
-
+        trigger_avoid = False
         if(intRet):
             if(skill_str is 1 and self.power_shot):
+                print("select power shot")
                 actionAttr = self.__special_actions[skill_str]
+                self.power_shot = False
             elif(skill_str is 2 and self.avoid):
                 actionAttr = self.__special_actions[skill_str]
+                self.avoid = False
+                trigger_avoid = True
             else:
                 actionAttr = self.__special_actions[0]
         else:
@@ -233,12 +237,11 @@ class player:
         absolute_move = forward_move * \
             int(math.copysign(1, enemy.getPos() - self.getPos()))
         move = self.move(absolute_move, enemy, event_map)
+        self.buffExpire()
         dmg = enemy.getHurt(self.getAtb(), self.getPos(), atk_ratio, atk_range)
         
-        self.buffExpire()
-        enemy.buffExpire()
-
-        return (atk_range, move, dmg, actual_mp_reg, enemy.avoid_buff)
+        print("atk range: ", atk_range, ", dmg: ", dmg)
+        return (atk_range, move, dmg, actual_mp_reg, enemy.avoid_buff, trigger_avoid)
     
     def buffExpire(self):
         if(self.avoid_buff > 0):
@@ -246,7 +249,6 @@ class player:
 
     # this will change the player's hp
     def getHurt(self, enemyAtb: attribute, enemyPos: int, atk_ratio: float, atk_range: int):
-        print("HURT!")
         dmg = int(enemyAtb.atk * (atk_ratio + 0.5) * (1 - self.__atb.dfs /
                   DEF_PARAMS)) if(abs(enemyPos - self.__pos) <= atk_range) else 0
                   

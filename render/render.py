@@ -17,7 +17,7 @@ LEFT    =   -1
 RIGHT   =   1
 
 class Render:
-    def __init__(self):
+    def __init__(self, eventmap):
         pygame.init()
         width, height = 1024, 480
         self.screen = pygame.display.set_mode((width, height))
@@ -26,6 +26,7 @@ class Render:
         # allsprite = pygame.sprite.Group()
         # clock = pygame.time.Clock()
         background = pygame.image.load('./render/background.png')
+        self.eventmap = eventmap
         self.frameL = round(1003/17)
         self.xs = [round((1003/17)*i + (1003/17)/2)+10 for i in range(17)]
         self.background = background.convert()
@@ -46,11 +47,10 @@ class Render:
     def switchEvent(self, pos, state):
         self.mapEventEffect[pos].setEventState(state)
 
-    def render(self, players, atkRange, move, dmg, mp, avoid, eventmap, triggerevent):
+    def render(self, players, atkRange, move, dmg, mp, avoid, eventmap, triggeravoid):
         pygame.display.update()
 
-        self.eventmap = eventmap
-        self.triggerevent = triggerevent
+        self.triggeravoid = triggeravoid
         self.turn = players[0]
         self.oppose_avoid = avoid
 
@@ -60,7 +60,13 @@ class Render:
             self.wholeAttack(players[0], atkRange, dmg, players[1])
         if(mp > 0):
             self.wholeMp(players[0], mp, players[1])
+        if(triggeravoid):
+            self.triggerAvoid(players[0])
+            
         return True
+
+    def mapEventSet(self, eventmap):
+        self.eventmap = eventmap
 
     def end(self, player):
         winner = self.players[player.getPid()]
@@ -81,7 +87,6 @@ class Render:
         self.win(player.getName())
 
     def wholeMove(self, player, pos, eventmap):
-        self.updateStatus(player)
         player_id = player.getPid()
         finish = False
         while(not finish):
@@ -91,6 +96,7 @@ class Render:
             finish = self.move(player_id, pos)
             self.draw()
             pygame.display.update()
+        self.updateStatus(player)
         if(self.eventmap[pos] is 1):
             self.players[player.getPid()].power_shot_ready = True
         elif(self.eventmap[pos] is 2):
@@ -108,7 +114,6 @@ class Render:
             finish = self.attack(player, atkRange, damage, oppose)
             self.draw()
             pygame.display.update()
-        self.eventmap.getEventMap()
         self.reset()
 
     def startup(self, players):
@@ -128,6 +133,10 @@ class Render:
     def updateStatus(self, player):
         self.players[player.getPid()].hp = player.getAtb().hp
         self.players[player.getPid()].mp = player.getAtb().mp
+        self.players[player.getPid()].power_shot_ready = player.power_shot
+        self.players[player.getPid()].avoid_ready = player.avoid
+        self.players[player.getPid()].avoid_buff = player.avoid_buff
+        self.players[player.getPid()].avoid_buff = player.avoid_buff
 
     def move(self, player, pos):
         current_x = self.players[player].getPos()[0]
@@ -161,28 +170,57 @@ class Render:
         self.updateStatus(player)
         if(not hit):
             damage = 0
+
         if(oppose_x - current_x > 0):
             toward = RIGHT
         else:
             toward = LEFT
+
         if(atk_range <= 3):
             state = self.players[current_id].shortAttack(current_x + toward * atk_range * self.frameL, current_x, toward)
-        else:
-            if(abs(atk_range * self.frameL) >= abs(oppose_x - current_x)):
+        elif(atk_range <= 6):
+            if(abs(atk_range * self.frameL) >= abs(oppose_x - current_x) and self.oppose_avoid == 0):
                 state = self.players[current_id].rangedAttack(oppose_x, current_x, toward)
             else:
                 state = self.players[current_id].rangedAttack(current_x + toward * atk_range * self.frameL, current_x, toward)
+        else:
+            state = self.players[current_id].powershot(oppose_x, current_x, toward)
+
         if(damage > 0):
+            self.updateStatus(oppose)
             if(state == 1):
                 self.players[oppose_id].injure(damage, toward*(-1))
-                self.updateStatus(oppose)
             elif(state == 2):
                 return True and self.players[oppose_id].injure(damage, toward*(-1))
         else:
-            self.players[oppose_id].idle(toward*(-1))
+            self.updateStatus(oppose)
+            if(self.oppose_avoid > 0 and hit):
+                self.players[oppose_id].avoid(toward * -1)
+            else:
+                self.players[oppose_id].idle(toward*(-1))
             if(state == 2):
                 return True
         return False
+
+    def triggerAvoid(self, player):
+        finish = False
+        current_id = player.getPid()
+        current_x = self.players[current_id].getPos()[0]
+        oppose_x = self.players[(current_id+1)%2].getPos()[0]
+        if(oppose_x - current_x > 0):
+            toward = RIGHT
+        else:
+            toward = LEFT
+        while(not finish):
+            pygame.event.get()
+            self.drawBackground()
+            self.clock.tick(self.ticks)
+            finish = self.players[current_id].avoid(toward)
+            self.players[(current_id+1)%2].idle(toward*(-1))
+            self.draw()
+            pygame.display.update()
+        self.updateStatus(player)
+        self.reset()
 
     def wholeMp(self, player, mp, oppose):
         finish = False

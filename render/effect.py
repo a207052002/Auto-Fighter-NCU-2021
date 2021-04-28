@@ -19,19 +19,27 @@ class Effect(pygame.sprite.Sprite):
         self.lFont = pygame.freetype.Font(
             './render/resource/TaipeiSansTCBeta-Bold.ttf', 200)
         self.effects['wave'] = ss.load_strip((0, 32*3+1, 32, 32), 7)
+        self.effects['power_wave'] = ss.load_strip((64*4+1, 0, 64, 64), 4)
+        tmp_wave = ss.load_strip((64*4+1, 64*2 + 1, 64, 64), 4)
         tmp = []
         for p in self.effects['wave']:
             tmp.append(pygame.transform.scale(p, (79, 79)))
-
+        self.effects['wave'] = tmp.copy()
+        tmp = []
+        for p in self.effects['power_wave']:
+            tmp.append(pygame.transform.scale(p, (350, 350)))
+        for p in tmp_wave:
+            tmp.append(pygame.transform.scale(p, (350, 350)))
+        self.effects['power_wave'] = tmp.copy()
         self.effects['avoid_event'] = pygame.image.load('./render/resource/avoid_event.png').convert_alpha()
         self.effects['avoid_event'] = pygame.transform.scale(
-                self.effects['avoid_event'], (56, 50))
+                self.effects['avoid_event'], (45, 40))
 
         self.effects['power_event'] = pygame.image.load('./render/resource/power_event.png').convert_alpha()
         self.effects['power_event'] = pygame.transform.scale(
-                self.effects['power_event'], (56, 50))
+                self.effects['power_event'], (45, 40))
+        self.effects['using_avoid'] = pygame.image.load('./render/resource/power_event_using.png').convert_alpha()
 
-        self.effects['wave'] = tmp
         self.image = pygame.Surface([10, 10], pygame.SRCALPHA)
         self.rect = self.image.get_rect()
         self.actionTimer = 0
@@ -98,6 +106,24 @@ class Effect(pygame.sprite.Sprite):
             return True
         self.actionTimer += 1
         return False
+
+    def powerWave(self, dx, sx, horizon):
+        self.second_statge = 0
+        self.image = self.effects['power_wave'][self.actionTimer % 4]
+        if(dx - sx < 0):
+            self.image = pygame.transform.flip(self.image, True, False)
+            toward = -1
+        else:
+            toward = 1
+        size_y, size_x = self.image.get_size()
+        self.rect.center = (sx + 60 * self.actionTimer * toward - int(size_x/2), horizon - int(size_y/2))
+        self.actionTimer += 1
+        if(self.actionTimer >= 19):
+            return True
+        return False
+        
+
+
 
     def setDamage(self, damage):
         surface, rect = self.font.render(str(damage), (255, 0, 0))
@@ -202,7 +228,7 @@ class Effect(pygame.sprite.Sprite):
             self.image = self.effects['avoid_event']
         else:
             self.image = pygame.Surface([56, 50], pygame.SRCALPHA)
-        self.rect.center = (x - int(size_x/2), y - int(size_y/2))
+        self.rect.center = (x - int(size_x/2), y + 25)
 
     def setEventState(self, event):
         if(event is 1):
@@ -211,14 +237,16 @@ class Effect(pygame.sprite.Sprite):
             self.image = self.effects['avoid_event']
         else:
             self.image = pygame.Surface([56, 50], pygame.SRCALPHA)
-
     def setStatusEvent(self, event, x, y):
-        if(event is 1):
-            self.image = self.effects['power_event']
-        elif(event is 2):
-            self.image = self.effects['avoid_event']
 
-        self.image = pygame.transform.scale(self.image, (17, 15))
+        if(event == 1):
+            self.image = self.effects['power_event']
+        elif(event == 2):
+            self.image = self.effects['avoid_event']
+        elif(event == 3):
+            self.image = self.effects['using_avoid']
+
+        self.image = pygame.transform.scale(self.image, (25, 21))
         (size_x, size_y) = self.image.get_size()
         self.rect.center = (x - int(size_x/2), y - int(size_y/2))
     

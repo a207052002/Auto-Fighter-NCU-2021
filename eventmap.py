@@ -14,7 +14,7 @@ class Eventmap:
         for i in playerPos:
             map_idx.remove(i)
         event_pos = random.choice(map_idx)
-        event = random.randint(1,2)
+        event = random.randint(1,4)
         self.mapInfo[event_pos] = event
     
     def getEventMap(self):

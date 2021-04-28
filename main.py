@@ -38,8 +38,9 @@ if(__name__ == '__main__'):
     p2.setActionLambda(advanceTankNPC.combatLogic)
     p2.setName(advanceTankNPC.name())
     # p2.cheat()
-    renderer = Render()
+    renderer = Render(eventmap.getEventMap())
     renderer.startup([p1, p2])
+    
 
     print("player0:")
     p1.getAtb().show()
@@ -51,12 +52,14 @@ if(__name__ == '__main__'):
     finish = False
 
     while(not finish):
-        if(random.randint(0,3) == 0):
-            eventmap.generateEvent([p1.getPos, p2.getPos])
+        if(random.randint(0,2) == 0 or True):
+            eventmap.generateEvent([p1.getPos(), p2.getPos()])
+            renderer.mapEventSet(eventmap.getEventMap())
 
         (atk_range, move, dmg, mp, avoid, triggerevent) = p1.action(p2, eventmap)
         round(p1, p2, atk_range, move, dmg)
         print(p1.getPos(), p2.getPos())
+
         renderer.render([p1, p2], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), triggerevent)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
@@ -64,8 +67,9 @@ if(__name__ == '__main__'):
         if(finish):
             break
 
-        if(random.randint(0,3) == 0):
-            eventmap.generateEvent([p1.getPos, p2.getPos])
+        if(random.randint(0,2) == 0 or True):
+            eventmap.generateEvent([p1.getPos(), p2.getPos()])
+            renderer.mapEventSet(eventmap.getEventMap())
 
         (atk_range, move, dmg, mp, avoid, triggerevent) = p2.action(p1, eventmap)
         round(p1, p2, atk_range, move, dmg)

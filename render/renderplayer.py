@@ -22,6 +22,10 @@ class RenderPlayer(pygame.sprite.Sprite):
         self.ssm = SpriteSheet('./render/resource/cat2_base.png', second)
         self.images =   {}
         self.images['meditate'] = self.ssm.load_strip((0, 0, 64, 64), 7)
+        self.images['powershot'] = self.ssm.load_strip((0, 0, 64, 64), 13)
+        self.images['powershot'] = list(np.repeat(self.images['powershot'], 2))
+        self.images['powershot'] = self.images['powershot'][:8] + self.images['powershot'][8:12] * 3 + self.images['powershot'][12:]
+        self.images['avoid'] = self.ss.load_strip((0, 64*8+1, 64, 64), 13)
         self.images['idle']   =   self.ss.load_strip((0, 0, 64, 64), 4)
         self.images['walk']  =   self.ss.load_strip((0, 64*1+1, 64, 64), 6)
         tmp =  self.ss.load_strip((0, 64*2+1, 64, 64), 8)
@@ -50,8 +54,10 @@ class RenderPlayer(pygame.sprite.Sprite):
 
         self.power_shot_effect = Effect()
         self.avoid_effect = Effect()
+        self.avoid_buff_effect = Effect()
         self.power_shot_ready = False
         self.avoid_ready = False
+        self.avoid_buff = 0
 
         for k, v in self.images.items():
             for idx, img in enumerate(v):
@@ -149,6 +155,54 @@ class RenderPlayer(pygame.sprite.Sprite):
                 return 1
             self.actionTimer += 1
         return 0
+
+    def powershot(self, dx, sx, toward):
+        hit = False
+        finish = False
+        if(self.state != 'powershot'):
+            self.effect.reset()
+            self.actionTimer = 0
+            self.state = 'powershot'
+            self.updateImg('powershot', self.actionTimer, toward)
+            self.actionTimer += 1
+        else:
+            if(self.actionTimer > 20):
+                hit = self.effect.powerWave(dx, sx, self.horizon)
+            if(self.actionTimer < 34):
+                self.updateImg('powershot', self.actionTimer, toward)
+                self.actionTimer += 1
+            else:
+                finish = True
+                self.updateImg('idle', self.actionTimer%4, toward)
+                self.actionTimer += 1
+        if(finish and hit):
+            return 2
+        elif(hit):
+            return 1
+        else:
+            return 0
+
+
+    def avoid(self, toward):
+        if(self.state != 'avoid'):
+            self.actionTimer = 0
+            self.state = 'avoid'
+            self.updateImg('avoid', self.actionTimer, toward)
+            self.actionTimer += 1
+        else:
+            if(self.actionTimer < 13):
+                if(self.actionTimer > 2):
+                    (x, y) = self.rect.center
+                    self.rect.center = (x, self.horizon - int((self.jumpRefer[self.actionTimer - 3])/2) )
+                self.updateImg('avoid', self.actionTimer, toward)
+                self.actionTimer += 1
+            else:
+                self.updateImg('idle', self.actionTimer%4, toward)
+                self.actionTimer += 1
+                return True
+        return False
+
+            
     
     def injure(self, damage, toward):
         
@@ -247,12 +301,17 @@ class RenderPlayer(pygame.sprite.Sprite):
         pygame.draw.rect(self.bar, (0, 0, 255), pygame.Rect(0, width+1, mp_len, width))
 
         if(self.power_shot_ready):
-            self.power_shot_ready.setStatusEvent(1, pos[0] + 10, pos[1] - 40)
-            self.power_shot_ready.selfBlit(screen)
+            self.power_shot_effect.setStatusEvent(1, pos[0] + 15, pos[1] - 30)
+            self.power_shot_effect.selfBlit(screen)
         if(self.avoid_ready):
-            self.avoid_ready.setStatusEvent(2, pos[0] + 32, pos[1] - 40)
-            self.avoid_ready.selfBlit(screen)
-
+            self.avoid_effect.setStatusEvent(2, pos[0] + 40, pos[1] - 30)
+            self.avoid_effect.selfBlit(screen)
+        if(self.avoid_buff > 0):
+            self.avoid_buff_effect.setStatusEvent(3, pos[0] + 75, pos[1] - 30)
+            self.avoid_buff_effect.selfBlit(screen)
+            self.avoid_buff_surface, rect = self.font.render(str(self.avoid_buff), (255, 190, 20))
+            self.avoid_buff_surface = pygame.transform.scale(self.avoid_buff_surface, (14, 14)).convert_alpha()
+            screen.blit(self.avoid_buff_surface, self.avoid_buff_effect.rect)
         screen.blit(self.bar, pos)
         
 
