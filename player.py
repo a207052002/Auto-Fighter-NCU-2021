@@ -190,7 +190,7 @@ class player:
             self.__atb.mp += int(self.__atb.max_mp * 0.2)
             event_map.clearEvent(self.__pos)
         
-        self.trigger_event = mapinfo[self.__pos]
+        self.trigger_event = mapinfo[self.__pos] if self.trigger_event != 2 else 0
 
         return move
 
@@ -237,6 +237,7 @@ class player:
 
         if(actionAttr.avoid):
             self.avoid_buff = AVOID_ROUND
+            self.trigger_event = 2
 
         self.__atb.mp -= mp_cost
 
