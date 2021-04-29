@@ -16,7 +16,7 @@ RIGHT   =   1
 
 
 class RenderPlayer(pygame.sprite.Sprite):
-    def __init__(self, horizon, max_hp, max_mp, scale=1, second=False):
+    def __init__(self, fm, horizon, max_hp, max_mp, scale=1, second=False):
         pygame.sprite.Sprite.__init__(self)
         self.ss = SpriteSheet('./render/resource/sprite_base_addon_2012_12_14.png', second)
         self.ssm = SpriteSheet('./render/resource/cat2_base.png', second)
@@ -50,12 +50,12 @@ class RenderPlayer(pygame.sprite.Sprite):
         self.bar = pygame.Surface(self.bar_shape)
         self.bar.fill((0,0,0))
         self.font = pygame.freetype.Font('./render/resource/TaipeiSansTCBeta-Bold.ttf', 16)
-        self.effect = Effect()
+        self.effect = Effect(fm)
 
-        self.power_shot_effect = Effect()
-        self.avoid_effect = Effect()
-        self.avoid_buff_effect = Effect()
-        self.heal_effect = Effect()
+        self.power_shot_effect = Effect(fm)
+        self.avoid_effect = Effect(fm)
+        self.avoid_buff_effect = Effect(fm)
+        self.heal_effect = Effect(fm)
         self.power_shot_ready = False
         self.avoid_ready = False
         self.avoid_buff = 0

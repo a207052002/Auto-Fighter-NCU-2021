@@ -5,15 +5,29 @@ import numpy as np
 LEFT = -1
 RIGHT = 1
 
+class FileManager():
+    def __init__(self):
+        self.sses = {}
+        self.imgs = {}
+    def loadss(self, filename):
+        if(filename not in self.imgs):
+            self.sses[filename] = SpriteSheet(filename)
+
+        return self.sses[filename]
+    def loadImg(self, filename):
+        if(filename not in self.imgs):
+            self.imgs[filename] = pygame.image.load(filename).convert_alpha()
+        
+        return self.imgs[filename]
 
 class Effect(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, fm):
         pygame.sprite.Sprite.__init__(self)
         self.effects = {}
-        ss = SpriteSheet('./render/resource/swoosh.png')
+        ss = fm.loadss('./render/resource/swoosh.png')
         tmp_arr = []
         self.effects['swoosh'] = ss.load_strip((0, 0, 32, 32), 4)
-        ss = SpriteSheet('./render/resource/energy_effect_base.png')
+        ss = fm.loadss('./render/resource/energy_effect_base.png')
         self.font = pygame.freetype.Font(
             './render/resource/TaipeiSansTCBeta-Bold.ttf', 25)
         self.lFont = pygame.freetype.Font(
@@ -31,22 +45,22 @@ class Effect(pygame.sprite.Sprite):
         for p in tmp_wave:
             tmp.append(pygame.transform.scale(p, (350, 350)))
         self.effects['power_wave'] = tmp.copy()
-        self.effects['avoid_event'] = pygame.image.load('./render/resource/avoid_event.png').convert_alpha()
+        self.effects['avoid_event'] = fm.loadImg('./render/resource/avoid_event.png')
         self.effects['avoid_event'] = pygame.transform.scale(
                 self.effects['avoid_event'], (30, 30))
 
-        self.effects['power_event'] = pygame.image.load('./render/resource/power_event.png').convert_alpha()
+        self.effects['power_event'] = fm.loadImg('./render/resource/power_event.png')
         self.effects['power_event'] = pygame.transform.scale(
                 self.effects['power_event'], (30, 30))
-        self.effects['using_avoid'] = pygame.image.load('./render/resource/power_event_using.png').convert_alpha()
-        self.effects['heart'] = pygame.image.load('./render/resource/heart.png').convert_alpha()
+        self.effects['using_avoid'] = fm.loadImg('./render/resource/power_event_using.png')
+        self.effects['heart'] = fm.loadImg('./render/resource/heart.png')
         self.effects['heart'] = pygame.transform.scale(
                 self.effects['heart'], (30, 30))
-        mpss = SpriteSheet('./render/resource/potions.png')
+        mpss = fm.loadss('./render/resource/potions.png')
         self.effects['mp'] = mpss.load_strip((0, 16*5+1, 16, 16), 10)[8]
         self.effects['mp'] = pygame.transform.scale(
                 self.effects['mp'], (30, 30))
-        healingss = SpriteSheet('./render/resource/teleporter_hit.png')
+        healingss = fm.loadss('./render/resource/teleporter_hit.png')
         healling_effect = []
         for idx in range(8):
             tmp = healingss.load_strip((0, 128*idx, 128, 128), 1)[0]

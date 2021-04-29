@@ -37,10 +37,13 @@ class Render:
         self.clock = pygame.time.Clock()
         self.ticks = 15
         self.mapEventEffect = []
-        self.globalEffect = Effect()
+
+        self.fm = FileManager()
+        self.globalEffect = Effect(self.fm)
+
 
         for xcoor in self.xs:
-            effect = Effect()
+            effect = Effect(self.fm)
             effect.setEvent(xcoor, self.eventy, 0)
             self.mapEventEffect.append(effect)
 
@@ -131,8 +134,8 @@ class Render:
         atbs.append(players[0].getAtb())
         atbs.append(players[1].getAtb())
         self.players = []
-        self.players.append(RenderPlayer(self.fixy, atbs[0].hp, atbs[0].mp, 2))
-        self.players.append(RenderPlayer(self.fixy, atbs[1].hp, atbs[1].mp, 2, second=True))
+        self.players.append(RenderPlayer(self.fm, self.fixy, atbs[0].hp, atbs[0].mp, 2))
+        self.players.append(RenderPlayer(self.fm, self.fixy, atbs[1].hp, atbs[1].mp, 2, second=True))
         for idx, p in enumerate(self.players):
             p.setName(players[idx].getName())
             p.setPos(self.xs[players[idx].getPos()], -1 + idx*2)
@@ -157,7 +160,7 @@ class Render:
         return self.players[player].jump(self.xs[pos], current_x, toward)
 
     def fight(self):
-        fight_effect = Effect()
+        fight_effect = Effect(self.fm)
         fight_effect.reset()
         fight_effect.setFight(round(1024/2), round(480/2))
         finish = False
@@ -259,7 +262,7 @@ class Render:
             p.effect.reset()
 
     def win(self, name):
-        win_effect = Effect()
+        win_effect = Effect(self.fm)
         win_effect.reset()
         win_effect.setWinner(name, round(1024/2), round(480/2))
         finish = False
