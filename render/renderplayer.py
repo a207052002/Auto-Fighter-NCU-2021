@@ -9,11 +9,6 @@ from .spritesheet import SpriteSheet
 def coor(t):
     return 10*t - 0.5*5*t**2
 
-MAX_HP  =   10000
-MAX_MP  =   10000
-LEFT    =   -1
-RIGHT   =   1
-
 
 class RenderPlayer(pygame.sprite.Sprite):
     def __init__(self, fm, horizon, max_hp, max_mp, scale=1, second=False):

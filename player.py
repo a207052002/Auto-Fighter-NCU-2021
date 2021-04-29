@@ -1,13 +1,13 @@
 import copy
 import math
 
-ATK_MP_RATIO = 0.1/1.0
+ATK_MP_RATIO = 0.2/1.0
 MOVE_MP_RATIO = 10/1.0
-ATK_RANGE_MP_RATIO = 5/1.0
+ATK_RANGE_MP_RATIO = 10/1.0
 
 HP_PASSIVE_RATIO = 100/1
 DEF_PASSIVE_RATIO = 10/1
-ATK_PASSIVE_RATIO = 80/1
+ATK_PASSIVE_RATIO = 40/1
 MP_PASSIVE_RATIO = 10/1
 
 BASE_HP = 3000
@@ -24,7 +24,7 @@ MAX_PASSIVES_NPC = 50
 MAX_PASSIVES_PLAYER = 30
 DEF_PARAMS = 660
 
-TEMP_MP = 30
+TEMP_MP = 15
 
 REG_MP_ACTION = 0
 USING_POWER_SHOT = 1
@@ -238,7 +238,8 @@ class player:
             mp_cost -= TEMP_MP
 
         if(self.__atb.mp < mp_cost):
-            actionAttr = self.__special_actions[0]
+            mp_cost = 0
+            actionAttr = self.__special_actions[ACTION_REG]
 
         # skill = self.skill_set[skill_str]
         actual_mp_reg = 0
@@ -265,6 +266,11 @@ class player:
         move = self.move(absolute_move, enemy, event_map)
         self.buffExpire()
         dmg = enemy.getHurt(self.getAtb(), self.getPos(), atk_ratio, atk_range, speical_action)
+
+        if(self.__atb.mp > self.__atb.max_mp):
+            self.__atb.mp = self.__atb.max_mp
+        if(self.__atb.hp > self.__atb.max_hp):
+            self.__atb.hp = self.__atb.max_hp
         
         return (atk_range, move, dmg, actual_mp_reg, enemy.avoid_buff, self.trigger_event)
     
