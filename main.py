@@ -48,7 +48,7 @@ if(__name__ == '__main__'):
     finish = False
 
     while(not finish):
-        if(random.randint(0,2) == 0 or True):
+        if(random.randint(0,2) == 0):
             eventmap.generateEvent([p1.getPos(), p2.getPos()])
             renderer.mapEventSet(eventmap.getEventMap())
 
@@ -62,7 +62,7 @@ if(__name__ == '__main__'):
         if(finish):
             break
 
-        if(random.randint(0, 2) == 0 or True):
+        if(random.randint(0, 2) == 0):
             eventmap.generateEvent([p1.getPos(), p2.getPos()])
             renderer.mapEventSet(eventmap.getEventMap())
 
