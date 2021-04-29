@@ -15,7 +15,7 @@ def passive():
     # 字母順序不影響效果呈現，我們只會數對應的字母數量有多少
     # 未滿 30 或是前 30 個內有規格外字母，就代表你放棄了這些天賦點
 
-    passive_str = "H" * 20 + "D" * 0 + "A" * 5 + "M" * 5
+    passive_str = "H" * 0 + "D" * 0 + "A" * 20 + "M" * 10
     return passive_str
 
 def combatLogic(enemy, me, eventmap):
@@ -97,14 +97,14 @@ def combatLogic(enemy, me, eventmap):
         action = 0
     else:
         if(abs(enemy_pos - my_pos) < 4):
-            if(my_pos <= 3 or my_pos >= 9):
-                action = "FFFFFRRRRRR"
+            if(my_pos <= 3 or my_pos >= 13):
+                action = "FFFFFF"
             else:
-                action = "BBBBRRRRRR"
+                action = "B" * ( 5 - abs(enemy_pos - my_pos)) + "RRRRR"
         elif(abs(enemy_pos - my_pos) <= 5 and my_mp <= 100):
-            action = "RRRRR"
+            action = "R" * abs(enemy_pos - my_pos)
         elif(abs(enemy_pos - my_pos) <= 5):
-            action = "RRRRRAAAA"
+            action = "R" * abs(enemy_pos - my_pos) + "AAAA"
         elif(abs(enemy_pos - my_pos) > 5):
             action = "F"
     if(my_avoid):

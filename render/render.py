@@ -68,10 +68,8 @@ class Render:
         if(abs(move) > 0):
             self.wholeMove(players[0], players[0].getPos(), eventmap)
             if(trigger_event == 3):
-                print("heal HP")
                 self.recover(trigger_event, players[0].getPid())
             if(trigger_event == 4):
-                print("heal MP")
                 self.recover(trigger_event, players[0].getPid())
         if(atkRange > 0):
             self.wholeAttack(players[0], atkRange, dmg, players[1])
@@ -87,15 +85,11 @@ class Render:
     def mapEventSet(self, eventmap):
         having_change = np.asarray(self.eventmap) != np.asarray(eventmap)
         for idx, ef in enumerate(self.mapEventEffect):
-            print(idx)
             if(having_change[idx]):
-                print(having_change)
                 x,y = ef.rect.center
                 finish = False
                 ef.reset()
                 while(not finish):
-                    print('animation')
-                    print(eventmap[idx])
                     finish = ef.eventDropAnimate(eventmap[idx], self.xs[idx], self.eventy)
                     self.drawBackground_s(eventmap)
                     self.draw()
@@ -141,7 +135,6 @@ class Render:
 
     def wholeAttack(self, player, atkRange, damage, oppose):
         finish = False
-        print(player.getPid(), " ATTACK", damage)
         while(not finish):
             eventMonitor()
             self.drawBackground()

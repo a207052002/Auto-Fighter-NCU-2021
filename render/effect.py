@@ -257,7 +257,7 @@ class Effect(pygame.sprite.Sprite):
                 255*((self.actionTimer - 13) / 7))), None, pygame.BLEND_RGBA_MULT)
             rectSize = self.image.get_size()
             self.rect.center = self.certralize(self.standardCenter, rectSize)
-        elif(self.actionTimer >= 20):
+        elif(self.actionTimer >= 30):
             self.image = pygame.Surface([10, 10], pygame.SRCALPHA)
             return True
         self.actionTimer += 1

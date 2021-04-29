@@ -8,7 +8,7 @@ from profiles import *
 from render import Render
 from eventmap import *
 
-
+RENDER = True
 MAX_POS = 16
 
 def round(p1, p2, atkRange, move, dmg):
@@ -17,8 +17,8 @@ def round(p1, p2, atkRange, move, dmg):
 
 
 def build():
-    pos1, pos2 = (0, 16)
-    # pos1, pos2 = random.randint(0, 5), random.randint(7, 12)
+    # pos1, pos2 = (0, 16)
+    pos1, pos2 = random.randint(0, 7), random.randint(9, 16)
     return [player(pos1, 0), player(pos2, 1)]
 
 
@@ -34,8 +34,9 @@ if(__name__ == '__main__'):
     p2.setActionLambda(advanceTankNPC.combatLogic)
     p2.setName(advanceTankNPC.name())
     # p2.cheat()
-    renderer = Render(eventmap.getEventMap())
-    renderer.startup([p1, p2])
+    if(RENDER):
+        renderer = Render(eventmap.getEventMap())
+        renderer.startup([p1, p2])
     
 
     print("player0:")
@@ -50,11 +51,12 @@ if(__name__ == '__main__'):
     while(not finish):
         if(random.randint(0,2) == 0):
             eventmap.generateEvent([p1.getPos(), p2.getPos()])
-            renderer.mapEventSet(eventmap.getEventMap())
+            if(RENDER):
+                renderer.mapEventSet(eventmap.getEventMap())
 
         (atk_range, move, dmg, mp, avoid, trigger_event) = p1.action(p2, eventmap)
-        round(p1, p2, atk_range, move, dmg)
-        renderer.render([p1, p2], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event)
+        if(RENDER):
+            renderer.render([p1, p2], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
 
@@ -63,17 +65,20 @@ if(__name__ == '__main__'):
 
         if(random.randint(0, 2) == 0):
             eventmap.generateEvent([p1.getPos(), p2.getPos()])
-            renderer.mapEventSet(eventmap.getEventMap())
+            if(RENDER):
+                renderer.mapEventSet(eventmap.getEventMap())
 
         (atk_range, move, dmg, mp, avoid, trigger_event) = p2.action(p1, eventmap)
-        round(p1, p2, atk_range, move, dmg)
-        renderer.render([p2, p1], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event)
+        if(RENDER):
+            renderer.render([p2, p1], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
 
     if(p1.getAtb().hp <= 0):
-        print("p2 win")
-        renderer.end(p2)
+        print("p2: " + p2.getName() + " win")
+        if(RENDER):
+            renderer.end(p2)
     else:
-        print("p1 win")
-        renderer.end(p1)
+        print("p1: " + p1.getName() + " win")
+        if(RENDER):
+            renderer.end(p1)
