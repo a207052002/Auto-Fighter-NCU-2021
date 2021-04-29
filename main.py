@@ -25,9 +25,9 @@ def build():
 if(__name__ == '__main__'):
     eventmap = Eventmap()
     p1, p2 = build()
-    p1.setPassives(kitting.passive())
-    p1.setActionLambda(kitting.combatLogic)
-    p1.setName(kitting.name())
+    p1.setPassives(leftplayer.passive())
+    p1.setActionLambda(leftplayer.combatLogic)
+    p1.setName(leftplayer.name())
 
     p2.advanced()
     p2.setPassives(advanceTankNPC.passive())
@@ -48,13 +48,12 @@ if(__name__ == '__main__'):
     finish = False
 
     while(not finish):
-        if(random.randint(0,2) == 0):
+        if(random.randint(0,2) == 0 or True):
             eventmap.generateEvent([p1.getPos(), p2.getPos()])
             renderer.mapEventSet(eventmap.getEventMap())
 
         (atk_range, move, dmg, mp, avoid, trigger_event) = p1.action(p2, eventmap)
         round(p1, p2, atk_range, move, dmg)
-        print(p1.getPos(), p2.getPos())
 
         renderer.render([p1, p2], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event)
 
@@ -63,13 +62,13 @@ if(__name__ == '__main__'):
         if(finish):
             break
 
-        if(random.randint(0,2) == 0):
+        if(random.randint(0, 2) == 0 or True):
             eventmap.generateEvent([p1.getPos(), p2.getPos()])
             renderer.mapEventSet(eventmap.getEventMap())
 
         (atk_range, move, dmg, mp, avoid, trigger_event) = p2.action(p1, eventmap)
         round(p1, p2, atk_range, move, dmg)
-        print(p1.getPos(), p2.getPos())
+
         renderer.render([p2, p1], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0

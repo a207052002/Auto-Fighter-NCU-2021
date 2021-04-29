@@ -10,6 +10,11 @@ DEF_PASSIVE_RATIO = 10/1
 ATK_PASSIVE_RATIO = 80/1
 MP_PASSIVE_RATIO = 10/1
 
+BASE_HP = 3000
+BASE_DFS = 300
+BASE_ATK = 600
+BASE_MP = 300
+
 ATK_RATIO_UNIT = 5
 MAX_ATTACK_RANGE = 6
 MAX_MOVE_RANGE = 6
@@ -26,6 +31,14 @@ USING_POWER_SHOT = 1
 USING_AVOID = 2
 
 AVOID_ROUND = 4
+
+ACTION_REG = 0
+ACTION_POWER_SHOT = 1
+ACTION_AVOID = 2
+
+POWER_SHOT_PERCENT_DMG_MIN = 25
+POWER_SHOT_PERCENT_DMG_MAX = 55
+POWER_SHOT_PARAMS = 30 / (ATK_PASSIVE_RATIO * MAX_PASSIVES_PLAYER)**2
 
 # transform the result of skill to attribute
 
@@ -61,13 +74,16 @@ def rep(n, c):
 
 
 class skill():
-    def __init__(self, atk_count=0, forward=0, backward=0, atk_range=0, mp_reg=0, special=False, avoid=False):
+    def __init__(self, atk_count=0, forward=0, backward=0, atk_range=0, mp_reg=0, special=-1):
+        self.special = special
         self.atk_ratio = 1 + (atk_count * ATK_RATIO_UNIT) / 100
         self.forward_move = forward - backward
-        if(atk_range > MAX_ATTACK_RANGE and not special):
+
+        if(atk_range > MAX_ATTACK_RANGE and special < 0):
             self.atk_range = MAX_ATTACK_RANGE
         else:
             self.atk_range = atk_range
+
         if(atk_range == 0):
             atk_mp_offset = 0
         else:
@@ -77,9 +93,10 @@ class skill():
             self.atk_range * ATK_RANGE_MP_RATIO
         self.mp_reg = mp_reg
         self.mp_cost += 10
-        if(special):
+        if(special >= 0):
             self.mp_cost = 0
-        self.avoid = avoid
+        if(special == ACTION_AVOID):
+            self.avoid = True
 
 
 class attribute:
@@ -101,7 +118,7 @@ class player:
     def __init__(self, p: int, pid: int):
         self.__pid = pid
         self.__name = ""
-        self.__atb = attribute(3000, 300, 600, 300)
+        self.__atb = attribute(hp=BASE_HP, dfs=BASE_DFS, atk=BASE_ATK, mp=BASE_MP)
         self.__pos = p
         self.__max_passive = MAX_PASSIVES_PLAYER
 
@@ -110,9 +127,9 @@ class player:
         self.avoid = False
 
         self.__special_actions = []
-        self.__special_actions.append(skill(0, 0, 0, 0, 25))
-        self.__special_actions.append(skill(400, 0, 0, 25, 0, True))
-        self.__special_actions.append(skill(0, 0, 0, 0, 0, True, True))
+        self.__special_actions.append(skill(0, 0, 0, 0, 25, ACTION_REG))
+        self.__special_actions.append(skill(0, 0, 0, 25, 0, ACTION_POWER_SHOT))
+        self.__special_actions.append(skill(0, 0, 0, 0, 0, ACTION_AVOID))
 
 
     def advanced(self):
@@ -202,42 +219,43 @@ class player:
         assert intRet or strRet, "角色戰鬥邏輯回應了錯誤的類型，必須是字串或整數"
         self.trigger_event = 0
         if(intRet):
-            if(skill_str is 1 and self.power_shot):
-                print("select power shot")
-                actionAttr = self.__special_actions[skill_str]
+            if(skill_str == ACTION_POWER_SHOT and self.power_shot):
+                actionAttr = self.__special_actions[ACTION_POWER_SHOT]
                 self.power_shot = False
-            elif(skill_str is 2 and self.avoid):
-                actionAttr = self.__special_actions[skill_str]
+            elif(skill_str == ACTION_AVOID and self.avoid):
+                actionAttr = self.__special_actions[ACTION_AVOID]
                 self.avoid = False
             else:
-                actionAttr = self.__special_actions[0]
+                actionAttr = self.__special_actions[ACTION_REG]
         else:
             actionAttr = calSkillAtb(skill_str)
 
-        # skill = self.skill_set[skill_str]
-        actual_mp_reg = 0
-        if(actionAttr.mp_reg > 0):
-            actual_mp_reg = (actionAttr.mp_reg / 100) * self.__atb.max_mp
-            actual_mp_reg = int(actual_mp_reg)
-            self.__atb.mp += actual_mp_reg
-
         mp_cost = actionAttr.mp_cost
-
         # Players have base 30 temporary mp every round
         if(mp_cost <= TEMP_MP):
             mp_cost = 0
         else:
             mp_cost -= TEMP_MP
+
         if(self.__atb.mp < mp_cost):
             actionAttr = self.__special_actions[0]
+
+        # skill = self.skill_set[skill_str]
+        actual_mp_reg = 0
+        if(actionAttr.special == ACTION_REG):
+            actual_mp_reg = (actionAttr.mp_reg / 100) * self.__atb.max_mp
+            actual_mp_reg = int(actual_mp_reg)
+            self.__atb.mp += actual_mp_reg
 
         atk_ratio = actionAttr.atk_ratio
         forward_move = actionAttr.forward_move
         atk_range = actionAttr.atk_range
 
-        if(actionAttr.avoid):
+        speical_action = actionAttr.special
+
+        if(actionAttr.special == ACTION_AVOID):
             self.avoid_buff = AVOID_ROUND
-            self.trigger_event = 2
+            self.trigger_event = ACTION_AVOID
 
         self.__atb.mp -= mp_cost
 
@@ -246,9 +264,8 @@ class player:
             int(math.copysign(1, enemy.getPos() - self.getPos()))
         move = self.move(absolute_move, enemy, event_map)
         self.buffExpire()
-        dmg = enemy.getHurt(self.getAtb(), self.getPos(), atk_ratio, atk_range)
+        dmg = enemy.getHurt(self.getAtb(), self.getPos(), atk_ratio, atk_range, speical_action)
         
-        print("atk range: ", atk_range, ", dmg: ", dmg)
         return (atk_range, move, dmg, actual_mp_reg, enemy.avoid_buff, self.trigger_event)
     
     def buffExpire(self):
@@ -256,9 +273,13 @@ class player:
             self.avoid_buff -= 1
 
     # this will change the player's hp
-    def getHurt(self, enemyAtb: attribute, enemyPos: int, atk_ratio: float, atk_range: int):
-        dmg = int(enemyAtb.atk * (atk_ratio + 0.5) * (1 - self.__atb.dfs /
-                  DEF_PARAMS)) if(abs(enemyPos - self.__pos) <= atk_range) else 0
+    def getHurt(self, enemyAtb: attribute, enemyPos: int, atk_ratio: float, atk_range: int, special=-1):
+        if(special == ACTION_POWER_SHOT):
+            power_shot_percent = ((POWER_SHOT_PARAMS * (enemyAtb.atk - BASE_ATK)**2 + POWER_SHOT_PERCENT_DMG_MIN) / 100)
+            dmg = int(self.__atb.max_hp * power_shot_percent)
+        else:
+            dmg = int(enemyAtb.atk * (atk_ratio + 0.5) * (1 - self.__atb.dfs /
+                    DEF_PARAMS)) if(abs(enemyPos - self.__pos) <= atk_range) else 0
                   
         if(self.avoid_buff > 0):
             dmg = 0

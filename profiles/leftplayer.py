@@ -6,7 +6,7 @@ def passive():
     # 有 30 點配點，因此我們只會拿前 30 個字去用
     # 規則之外的字母會被忽略
     # 大小寫一樣
-    # 你的角色起始有 3000 hp、300 dfs、600 atk、100 mp
+    # 你的角色起始有 3000 hp、300 dfs、600 atk、300 mp
     # "H" 代表分配 1 點給 HP，每點 + 100 HP
     # "D" 代表分配 1 點給 dfs，每點 + 10 dfs(防禦減傷率算法為 (dfs/660))
     # "A" 代表分配 1 點給 atk，每點 + 80 atk(傷害算法為 atk*(0.5+技能倍率)*(1-dfs/660))
@@ -18,7 +18,6 @@ def passive():
     passive_str = "H" * 20 + "D" * 0 + "A" * 5 + "M" * 5
     return passive_str
 
-
 def combatLogic(enemy, me, eventmap):
     # 決定你的角色的自動戰鬥邏輯
     # 我們會幫你把你必須知道的資訊都先放進對應的變數，你們可以參考該變數來決定角色該怎麼動
@@ -26,7 +25,8 @@ def combatLogic(enemy, me, eventmap):
     # eventmap 是一個跟場地大小等長的陣列(list)，每陣列裡面非 0 的數字代表場地上存在的特殊道具
     # 移動到該格會自動撿起道具
     # 以下為陣列中的數字的意義
-    # 1 代表存在 P (Power shot) 撿到後可以一次性開啟超高倍率無限距離大招，透過 return 整數：1 來讓角色使用
+    # 1 代表存在 P (Power shot) 撿到後可以一次性開啟無視防禦 25% - 55%(隨角色攻擊提高) 生命的無限距離大招
+    # 撿到後透過 return 整數：1 來讓角色使用
     # 2 代表存在 A (Avoid) 撿到後可以一次性開啟一個 buff 持續三回合，期間無條件閃避所有攻擊
     # 以上兩個道具撿到後會存在身上直到使用，已經持有一樣的道具可以再撿但是不會額外增加數量
     # 3 代表存在 H (Heart) 撿到後可以回覆 20% 的生命(對坦克型角色有很好的效果)
@@ -93,9 +93,25 @@ def combatLogic(enemy, me, eventmap):
     #----------- 以下請開始撰寫你的程式
 
     action = 0
-    
+    if(my_mp <= 80):
+        action = 0
+    else:
+        if(abs(enemy_pos - my_pos) < 4):
+            if(my_pos <= 3 or my_pos >= 9):
+                action = "FFFFFRRRRRR"
+            else:
+                action = "BBBBRRRRRR"
+        elif(abs(enemy_pos - my_pos) <= 5 and my_mp <= 100):
+            action = "RRRRR"
+        elif(abs(enemy_pos - my_pos) <= 5):
+            action = "RRRRRAAAA"
+        elif(abs(enemy_pos - my_pos) > 5):
+            action = "F"
+    if(my_avoid):
+        action = 2
+    if(my_power_shot):
+        action = 1
 
-    # 這邊決定你要使用的技能編號，0-3 選一個。如果不在 0-3 內會視為普攻
     return action
 
 def name():

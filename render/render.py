@@ -198,10 +198,10 @@ class Render:
             state = self.players[current_id].powershot(oppose_x, current_x, toward)
 
         if(damage > 0):
-            self.updateStatus(oppose)
             if(state == 1):
                 self.players[oppose_id].injure(damage, toward*(-1))
             elif(state == 2):
+                self.updateStatus(oppose)
                 return True and self.players[oppose_id].injure(damage, toward*(-1))
         else:
             self.updateStatus(oppose)
