@@ -13,9 +13,13 @@ class Eventmap:
         map_idx = list(range(self.max_size))
         for i in playerPos:
             map_idx.remove(i)
-        event_pos = random.choice(map_idx)
-        event = random.randint(1,4)
-        self.mapInfo[event_pos] = event
+        for idx, i in enumerate(self.mapInfo):
+            if(i > 0):
+                map_idx.remove(idx)
+        if(len(map_idx) != 0):
+            event_pos = random.choice(map_idx)
+            event = random.randint(1,4)
+            self.mapInfo[event_pos] = event
     
     def getEventMap(self):
         return self.mapInfo.copy()

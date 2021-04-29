@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 from player import *
 from pygame.locals import *
 
@@ -15,6 +16,12 @@ YELLOW = (255,255,0) #黃色
 
 LEFT    =   -1
 RIGHT   =   1
+
+def eventMonitor():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
 
 class Render:
     def __init__(self, eventmap):
@@ -78,7 +85,24 @@ class Render:
         return True
 
     def mapEventSet(self, eventmap):
+        having_change = np.asarray(self.eventmap) != np.asarray(eventmap)
+        for idx, ef in enumerate(self.mapEventEffect):
+            print(idx)
+            if(having_change[idx]):
+                print(having_change)
+                x,y = ef.rect.center
+                finish = False
+                ef.reset()
+                while(not finish):
+                    print('animation')
+                    print(eventmap[idx])
+                    finish = ef.eventDropAnimate(eventmap[idx], self.xs[idx], self.eventy)
+                    self.drawBackground_s(eventmap)
+                    self.draw()
+                    pygame.display.update()
+                    self.clock.tick(self.ticks)
         self.eventmap = eventmap
+        
 
     def end(self, player):
         winner = self.players[player.getPid()]
@@ -89,7 +113,6 @@ class Render:
             toward = RIGHT
         finish = False
         while(not finish):
-            pygame.event.get()
             self.drawBackground()
             self.clock.tick(self.ticks)
             finish = loser.dead(toward)
@@ -102,7 +125,7 @@ class Render:
         player_id = player.getPid()
         finish = False
         while(not finish):
-            pygame.event.get()
+            eventMonitor()
             self.drawBackground()
             self.clock.tick(self.ticks)
             finish = self.move(player_id, pos)
@@ -120,7 +143,7 @@ class Render:
         finish = False
         print(player.getPid(), " ATTACK", damage)
         while(not finish):
-            pygame.event.get()
+            eventMonitor()
             self.drawBackground()
             self.clock.tick(self.ticks)
             finish = self.attack(player, atkRange, damage, oppose)
@@ -223,7 +246,7 @@ class Render:
         else:
             toward = LEFT
         while(not finish):
-            pygame.event.get()
+            eventMonitor()
             self.drawBackground()
             self.clock.tick(self.ticks)
             finish = self.players[current_id].avoid(toward)
@@ -243,7 +266,7 @@ class Render:
         else:
             toward = LEFT
         while(not finish):
-            pygame.event.get()
+            eventMonitor()
             self.drawBackground()
             self.clock.tick(self.ticks)
             finish = self.players[current_id].meditate(toward, mp)
@@ -273,6 +296,13 @@ class Render:
             win_effect.draw(self.screen)
             pygame.display.update()
             self.clock.tick(self.ticks)
+
+    def drawBackground_s(self, eventmap):
+        self.screen.fill((0,0,0))
+        self.screen.blit(self.background, [0,50])
+        for idx, p in enumerate(eventmap):
+            self.mapEventEffect[idx].setEventState(p)
+            self.mapEventEffect[idx].selfBlit(self.screen)
 
     def drawBackground(self):
         self.screen.fill((0,0,0))

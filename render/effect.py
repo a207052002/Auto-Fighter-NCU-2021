@@ -2,6 +2,7 @@ import pygame
 from .spritesheet import SpriteSheet
 import numpy as np
 
+
 LEFT = -1
 RIGHT = 1
 
@@ -10,7 +11,7 @@ class FileManager():
         self.sses = {}
         self.imgs = {}
     def loadss(self, filename):
-        if(filename not in self.imgs):
+        if(filename not in self.sses):
             self.sses[filename] = SpriteSheet(filename)
 
         return self.sses[filename]
@@ -18,7 +19,7 @@ class FileManager():
         if(filename not in self.imgs):
             self.imgs[filename] = pygame.image.load(filename).convert_alpha()
         
-        return self.imgs[filename]
+        return self.imgs[filename].copy()
 
 class Effect(pygame.sprite.Sprite):
     def __init__(self, fm):
@@ -57,7 +58,7 @@ class Effect(pygame.sprite.Sprite):
         self.effects['heart'] = pygame.transform.scale(
                 self.effects['heart'], (30, 30))
         mpss = fm.loadss('./render/resource/potions.png')
-        self.effects['mp'] = mpss.load_strip((0, 16*5+1, 16, 16), 10)[8]
+        self.effects['mp'] = mpss.load_strip((0, 16*5+1, 16, 16), 10)[8].copy()
         self.effects['mp'] = pygame.transform.scale(
                 self.effects['mp'], (30, 30))
         healingss = fm.loadss('./render/resource/teleporter_hit.png')
@@ -221,8 +222,8 @@ class Effect(pygame.sprite.Sprite):
 
     def setFight(self, x, y):
         self.standardCenter = (x, y)
-        readyImage, rect = self.lFont.render("Ready", (255, 20, 20))
-        fightImage, rect = self.lFont.render("FIGHT", (255, 20, 20))
+        readyImage, rect = self.lFont.render("Ready", (240, 80, 20))
+        fightImage, rect = self.lFont.render("FIGHT", (240, 80, 20))
         self.readyImage = readyImage.convert_alpha()
         self.fightImage = fightImage.convert_alpha()
         self.readySize = self.readyImage.get_size()
@@ -283,6 +284,28 @@ class Effect(pygame.sprite.Sprite):
             self.image = self.effects['mp']
         else:
             self.image = pygame.Surface([56, 50], pygame.SRCALPHA)
+
+    def eventDropAnimate(self, event, x, y):
+        if(event == 1):
+            self.image = self.effects['power_event'].copy()
+        elif(event == 2):
+            self.image = self.effects['avoid_event'].copy()
+        elif(event == 3):
+            self.image = self.effects['heart'].copy()
+        elif(event == 4):
+            self.image = self.effects['mp'].copy()
+        else:
+            self.image = pygame.Surface([56, 50], pygame.SRCALPHA)
+
+        self.rect.center = (x ,y - (400 - self.actionTimer * 80) + 35)
+        self.image.fill(
+                (255, 255, 255, int(round((self.actionTimer/5)*255))), None, pygame.BLEND_RGBA_MULT)
+        self.actionTimer += 1
+        if(self.actionTimer > 5):
+            return True
+        return False
+        
+    
     def setStatusEvent(self, event, x, y):
 
         if(event == 1):
