@@ -1,30 +1,32 @@
 import copy
 import math
 
-ATK_MP_RATIO = 0.2/1.0
+ATK_MP_RATIO = 10.0/10.0
 MOVE_MP_RATIO = 10/1.0
 ATK_RANGE_MP_RATIO = 10/1.0
 
 HP_PASSIVE_RATIO = 100/1
-DEF_PASSIVE_RATIO = 10/1
-ATK_PASSIVE_RATIO = 40/1
-MP_PASSIVE_RATIO = 10/1
+DEF_PASSIVE_RATIO = 5/1
+ATK_PASSIVE_RATIO = 30/1
+MP_PASSIVE_RATIO = 5/1
 
-BASE_HP = 3000
-BASE_DFS = 300
+BASE_HP = 6000
+BASE_DFS = 330
 BASE_ATK = 600
-BASE_MP = 300
+BASE_MP = 200
 
-ATK_RATIO_UNIT = 5
+ATK_RATIO_UNIT = 10
 MAX_ATTACK_RANGE = 6
 MAX_MOVE_RANGE = 6
 MAX_POS_EDGE = 16
 
-MAX_PASSIVES_NPC = 50
+ATK_BASE_RATIO = 0
+
+MAX_PASSIVES_NPC = 60
 MAX_PASSIVES_PLAYER = 30
 DEF_PARAMS = 660
 
-TEMP_MP = 15
+TEMP_MP = 20
 
 REG_MP_ACTION = 0
 USING_POWER_SHOT = 1
@@ -284,7 +286,7 @@ class player:
             power_shot_percent = ((POWER_SHOT_PARAMS * (enemyAtb.atk - BASE_ATK)**2 + POWER_SHOT_PERCENT_DMG_MIN) / 100)
             dmg = int(self.__atb.max_hp * power_shot_percent)
         else:
-            dmg = int(enemyAtb.atk * (atk_ratio + 0.5) * (1 - self.__atb.dfs /
+            dmg = int(enemyAtb.atk * (atk_ratio + ATK_BASE_RATIO) * (1 - self.__atb.dfs /
                     DEF_PARAMS)) if(abs(enemyPos - self.__pos) <= atk_range) else 0
                   
         if(self.avoid_buff > 0):
