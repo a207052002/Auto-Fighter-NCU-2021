@@ -146,8 +146,10 @@ class RenderPlayer(pygame.sprite.Sprite):
                 self.updateImg('idle', self.actionTimer%4, toward)
                 finish = True
             if(hit and finish):
+                self.actionTimer += 1
                 return 2
             if(hit and not finish):
+                self.actionTimer += 1
                 return 1
             self.actionTimer += 1
         return 0
@@ -199,15 +201,15 @@ class RenderPlayer(pygame.sprite.Sprite):
         return False
 
             
-    def heal(self, type, toward):
+    def heal(self, type, toward, amount):
         if(self.state != 'heal'):
             if(type == 3):
                 self.effect.reset()
-                self.effect.setDamage(int(self.max_hp*0.2), True)
+                self.effect.setDamage(amount, True)
                 self.effect.DoDamage(self.rect.center[0], self.rect.center[1] - 100)
             else:
                 self.effect.reset()
-                self.effect.setMPreg(int(self.max_mp*0.2))
+                self.effect.setMPreg(amount)
                 self.effect.doMP(self.rect.center[0], self.rect.center[1] - 100)
             self.state = 'heal'
             self.actionTimer = 0

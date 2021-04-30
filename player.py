@@ -1,18 +1,18 @@
 import copy
 import math
 
-ATK_MP_RATIO = 10.0/10.0
+ATK_MP_RATIO = 10.0/15.0
 MOVE_MP_RATIO = 10/1.0
 ATK_RANGE_MP_RATIO = 10/1.0
 
-HP_PASSIVE_RATIO = 100/1
-DEF_PASSIVE_RATIO = 5/1
+HP_PASSIVE_RATIO = 500/1
+DEF_PASSIVE_RATIO = 7/1
 ATK_PASSIVE_RATIO = 30/1
 MP_PASSIVE_RATIO = 5/1
 
-BASE_HP = 6000
+BASE_HP = 5000
 BASE_DFS = 330
-BASE_ATK = 600
+BASE_ATK = 1000
 BASE_MP = 200
 
 ATK_RATIO_UNIT = 10
@@ -38,8 +38,8 @@ ACTION_REG = 0
 ACTION_POWER_SHOT = 1
 ACTION_AVOID = 2
 
-POWER_SHOT_PERCENT_DMG_MIN = 25
-POWER_SHOT_PERCENT_DMG_MAX = 55
+POWER_SHOT_PERCENT_DMG_MIN = 30
+POWER_SHOT_PERCENT_DMG_MAX = 65
 POWER_SHOT_PARAMS = 30 / (ATK_PASSIVE_RATIO * MAX_PASSIVES_PLAYER)**2
 
 # transform the result of skill to attribute
@@ -203,13 +203,15 @@ class player:
             self.avoid = True
             event_map.clearEvent(self.__pos)
         elif(mapinfo[self.__pos] == 3):
-            self.__atb.hp += int(self.__atb.max_hp * 0.2)
+            self.recover = int(self.__atb.max_hp * 0.15 + 500)
+            self.__atb.hp += self.recover
             event_map.clearEvent(self.__pos)
         elif(mapinfo[self.__pos] == 4):
-            self.__atb.mp += int(self.__atb.max_mp * 0.2)
+            self.recover = int(self.__atb.max_mp * 0.25)
+            self.__atb.mp += self.recover
             event_map.clearEvent(self.__pos)
         
-        self.trigger_event = mapinfo[self.__pos] if mapinfo[self.__pos] != 2 else 0
+        self.trigger_event = mapinfo[self.__pos] if mapinfo[self.__pos] == 3 or mapinfo[self.__pos] == 4 else self.trigger_event
 
         return move
 
@@ -220,6 +222,7 @@ class player:
         strRet = isinstance(skill_str, str)
         assert intRet or strRet, "角色戰鬥邏輯回應了錯誤的類型，必須是字串或整數"
         self.trigger_event = 0
+        self.recover = 0
         if(intRet):
             if(skill_str == ACTION_POWER_SHOT and self.power_shot):
                 actionAttr = self.__special_actions[ACTION_POWER_SHOT]
@@ -274,7 +277,7 @@ class player:
         if(self.__atb.hp > self.__atb.max_hp):
             self.__atb.hp = self.__atb.max_hp
         
-        return (atk_range, move, dmg, actual_mp_reg, enemy.avoid_buff, self.trigger_event)
+        return (atk_range, move, dmg, actual_mp_reg, enemy.avoid_buff, self.trigger_event, self.recover)
     
     def buffExpire(self):
         if(self.avoid_buff > 0):

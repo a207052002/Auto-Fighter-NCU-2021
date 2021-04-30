@@ -21,8 +21,7 @@ def build():
     pos1, pos2 = random.randint(0, 7), random.randint(9, 16)
     return [player(pos1, 0), player(pos2, 1)]
 
-
-if(__name__ == '__main__'):
+def stage():
     eventmap = Eventmap()
     p1, p2 = build()
     p1.setPassives(leftplayer.passive())
@@ -54,9 +53,9 @@ if(__name__ == '__main__'):
             if(RENDER):
                 renderer.mapEventSet(eventmap.getEventMap())
 
-        (atk_range, move, dmg, mp, avoid, trigger_event) = p1.action(p2, eventmap)
+        (atk_range, move, dmg, mp, avoid, trigger_event, recover) = p1.action(p2, eventmap)
         if(RENDER):
-            renderer.render([p1, p2], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event)
+            renderer.render([p1, p2], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event, recover)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
 
@@ -68,9 +67,9 @@ if(__name__ == '__main__'):
             if(RENDER):
                 renderer.mapEventSet(eventmap.getEventMap())
 
-        (atk_range, move, dmg, mp, avoid, trigger_event) = p2.action(p1, eventmap)
+        (atk_range, move, dmg, mp, avoid, trigger_event, recover) = p2.action(p1, eventmap)
         if(RENDER):
-            renderer.render([p2, p1], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event)
+            renderer.render([p2, p1], atk_range, move, dmg, mp, avoid, eventmap.getEventMap(), trigger_event, recover)
 
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
 
@@ -78,7 +77,16 @@ if(__name__ == '__main__'):
         print("p2: " + p2.getName() + " win")
         if(RENDER):
             renderer.end(p2)
+        return 0
     else:
         print("p1: " + p1.getName() + " win")
         if(RENDER):
             renderer.end(p1)
+        return 1
+
+if(__name__ == '__main__'):
+    loop_time = 1
+    while(loop_time > 0):
+        result = stage()
+        loop_time -= 1
+

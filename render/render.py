@@ -58,7 +58,7 @@ class Render:
     def switchEvent(self, pos, state):
         self.mapEventEffect[pos].setEventState(state)
 
-    def render(self, players, atkRange, move, dmg, mp, avoid, eventmap, trigger_event):
+    def render(self, players, atkRange, move, dmg, mp, avoid, eventmap, trigger_event, recover):
         pygame.display.update()
 
         self.trigger_event = trigger_event
@@ -68,9 +68,9 @@ class Render:
         if(abs(move) > 0):
             self.wholeMove(players[0], players[0].getPos(), eventmap)
             if(trigger_event == 3):
-                self.recover(trigger_event, players[0].getPid())
+                self.recover(trigger_event, players[0].getPid(), recover)
             if(trigger_event == 4):
-                self.recover(trigger_event, players[0].getPid())
+                self.recover(trigger_event, players[0].getPid(), recover)
         if(atkRange > 0):
             self.wholeAttack(players[0], atkRange, dmg, players[1])
         if(mp > 0):
@@ -93,6 +93,8 @@ class Render:
                     finish = ef.eventDropAnimate(eventmap[idx], self.xs[idx], self.eventy)
                     self.drawBackground_s(eventmap)
                     self.draw()
+                    self.idle(0)
+                    self.idle(1)
                     pygame.display.update()
                     self.clock.tick(self.ticks)
         self.eventmap = eventmap
@@ -269,8 +271,14 @@ class Render:
         self.updateStatus(player)
         self.reset()
 
-    def idle(self, player, toward):
-        self.players[player].idle(toward)
+    def idle(self, player):
+        self.players[player].idle(self.getToward(player))
+
+    def getToward(self, player):
+        if(self.players[player].getPos()[0] - self.players[(player + 1) % 2].getPos()[0] > 0):
+            return LEFT
+        else:
+            return RIGHT
 
     def reset(self):
         for p in self.players:
@@ -304,7 +312,7 @@ class Render:
             self.mapEventEffect[idx].setEventState(p)
             self.mapEventEffect[idx].selfBlit(self.screen)
     
-    def recover(self, type, player_id):
+    def recover(self, etype, player_id, amount):
         current_pos = self.players[player_id].getPos()
         oppose_pos = self.players[(player_id+1)%2].getPos()
         if(oppose_pos > current_pos):
@@ -316,7 +324,8 @@ class Render:
         while(not finish):
             self.drawBackground()
             self.draw()
-            finish = self.players[player_id].heal(type, toward)
+            finish = self.players[player_id].heal(etype, toward, amount)
+            self.idle((player_id+1)%2)
             pygame.display.update()
             self.clock.tick(self.ticks)
         self.players[player_id].heal_effect.reset()
