@@ -243,6 +243,7 @@ class player:
             mp_cost -= TEMP_MP
 
         if(self.__atb.mp < mp_cost):
+            print("not enough MP, having %d, cost %d" % (self.__atb.mp, mp_cost))
             mp_cost = 0
             actionAttr = self.__special_actions[ACTION_REG]
 
