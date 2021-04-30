@@ -94,7 +94,7 @@ class skill():
             abs(self.forward_move) * MOVE_MP_RATIO + \
             self.atk_range * ATK_RANGE_MP_RATIO
         self.mp_reg = mp_reg
-        self.mp_cost += 10
+
         if(special >= 0):
             self.mp_cost = 0
         if(special == ACTION_AVOID):
@@ -243,7 +243,7 @@ class player:
             mp_cost -= TEMP_MP
 
         if(self.__atb.mp < mp_cost):
-            print("not enough MP, having %d, cost %d" % (self.__atb.mp, mp_cost))
+            print(" not enough MP, having %d, cost %d" % (self.__atb.mp, mp_cost))
             mp_cost = 0
             actionAttr = self.__special_actions[ACTION_REG]
 
