@@ -101,6 +101,7 @@ def combatLogic(enemy, me, eventmap):
 
     #----------- 以下請開始撰寫你的程式
 
+
     action = 0
     if(my_mp <= 80):
         action = 0
