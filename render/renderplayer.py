@@ -45,12 +45,19 @@ class RenderPlayer(pygame.sprite.Sprite):
         self.bar = pygame.Surface(self.bar_shape)
         self.bar.fill((0,0,0))
         self.font = pygame.freetype.Font('./render/resource/TaipeiSansTCBeta-Bold.ttf', 16)
+        self.nfont = pygame.freetype.Font('./render/resource/TaipeiSansTCBeta-Bold.ttf', 35)
         self.effect = Effect(fm)
 
         self.power_shot_effect = Effect(fm)
         self.avoid_effect = Effect(fm)
         self.avoid_buff_effect = Effect(fm)
         self.heal_effect = Effect(fm)
+
+        self.php_bar = Effect(fm)
+        self.pmp_bar = Effect(fm)
+        self.patk_bar = Effect(fm)
+        self.pdfs_bar = Effect(fm)
+
         self.power_shot_ready = False
         self.avoid_ready = False
         self.avoid_buff = 0
@@ -80,6 +87,40 @@ class RenderPlayer(pygame.sprite.Sprite):
         self.image = self.images[action][index]
         if(toward is LEFT):
             self.image = pygame.transform.flip(self.image, True, False)
+
+    def showUp(self, toward, passive, screen):
+
+        y_offset = int(480/6)
+
+        if(toward == RIGHT):
+            coorx = int((1024/2)/2)
+            bar_x = 512 + 40
+        else:
+            coorx = 1024 - int((1024/2)/2)
+            bar_x = 0 + 40
+
+        self.image = self.images['idle'][(self.actionTimer//2) %4]
+        if(toward == LEFT):
+            self.image = pygame.transform.flip(self.image, True, False)
+
+
+        s = self.image.get_size()
+
+        size_x_y = (int(s[0]), int(s[1]))
+        
+
+        self.image = pygame.transform.scale(self.image, (size_x_y[0] * 6 , size_x_y[1] * 6))
+        spx = int(self.image.get_size()[0]/2)
+        spy = int(self.image.get_size()[1]/2)
+        self.rect.center = (coorx - spx, (480/2) - spy - 20)
+        tsx = int(self.b_name_img.get_size()[0]/2)
+        screen.blit(self.b_name_img, (coorx - tsx, (480/2) + 190 ))
+        self.php_bar.bar(bar_x, y_offset*2 - 20, passive.h_c, 30, (90, 200, 20), screen, 0)
+        self.pdfs_bar.bar(bar_x, y_offset*3 - 20, passive.d_c, 30, (105, 105, 105), screen, 1)
+        self.patk_bar.bar(bar_x, y_offset*4 - 20, passive.a_c, 30, (220, 180, 20), screen, 2)
+        self.pmp_bar.bar(bar_x, y_offset*5 - 20, passive.m_c, 30, (70, 70, 225), screen, 3)
+
+        self.actionTimer += 1
 
     def setBar(self, hp, mp):
         self.hp = hp
@@ -356,13 +397,15 @@ class RenderPlayer(pygame.sprite.Sprite):
         return False
     def setName(self, name):
         self.name_img, rect = self.font.render(name, (0, 0, 0))
+        self.b_name_img, rect = self.nfont.render(name, (200, 200, 200))
 
-    def draw(self, screen):
+    def draw(self, screen, hud=True):
         screen.blit(self.image, self.rect)
-        name_width = self.name_img.get_size()[0]
-        screen.blit(self.name_img, (self.rect.center[0] - round(name_width/2), self.rect.center[1] - 57))
+        if(hud):
+            name_width = self.name_img.get_size()[0]
+            self.hud(screen)
+            screen.blit(self.name_img, (self.rect.center[0] - round(name_width/2), self.rect.center[1] - 57))
         # screen.blit(self.effect.image, self.effect.rect)
-        self.hud(screen)
 
     
 

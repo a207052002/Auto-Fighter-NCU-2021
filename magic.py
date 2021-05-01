@@ -28,22 +28,14 @@ def stage():
     p1.setActionLambda(leftplayer.combatLogic)
     p1.setName(leftplayer.name())
 
-    p2.advanced()
-    p2.setPassives(advanceTankNPC.passive())
-    p2.setActionLambda(advanceTankNPC.combatLogic)
-    p2.setName(advanceTankNPC.name())
+    # p2.advanced()
+    p2.setPassives(rightplayer.passive())
+    p2.setActionLambda(rightplayer.combatLogic)
+    p2.setName(rightplayer.name())
     # p2.cheat()
     if(RENDER):
         renderer = Render(eventmap.getEventMap())
         renderer.startup([p1, p2])
-    
-
-    print("player0:")
-    p1.getAtb().show()
-    print(p1.getPos())
-    print("player1:")
-    p2.getAtb().show()
-    print(p2.getPos())
 
     finish = False
 
@@ -74,19 +66,19 @@ def stage():
         finish = p1.getAtb().hp <= 0 or p2.getAtb().hp <= 0
 
     if(p1.getAtb().hp <= 0):
-        print("p2: " + p2.getName() + " win")
+        # print("p2: " + p2.getName() + " win")
         if(RENDER):
             renderer.end(p2)
-        return 0
+        return 1
     else:
-        print("p1: " + p1.getName() + " win")
+        # print("p1: " + p1.getName() + " win")
         if(RENDER):
             renderer.end(p1)
-        return 1
+        return 0
 
 if(__name__ == '__main__'):
     ps = [0, 0]
-    loop_time = 1000
+    loop_time = 100
     while(loop_time > 0):
         result = stage()
         loop_time -= 1

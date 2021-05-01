@@ -55,6 +55,44 @@ class Render:
             self.mapEventEffect.append(effect)
 
 
+    def showUp(self, passive1, passive2):
+        finish = False
+        while(not finish):
+            self.screen.fill((0,0,0))
+            self.tmp = self.background.copy()
+            self.tmp.fill((100, 100, 100), None, pygame.BLEND_RGBA_MULT)
+            self.screen.blit(self.tmp, [0,50])
+            self.players[0].showUp(RIGHT, passive1, self.screen)
+            self.players[0].draw(self.screen, hud=False)
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    finish = True
+            pygame.display.update()
+            self.clock.tick(self.ticks)
+
+        finish = False
+        for i in range(1):
+            self.tmp = self.background.copy()
+            self.tmp.fill((100, 100, 100), None, pygame.BLEND_RGBA_MULT)
+            self.screen.blit(self.tmp, [0,50])
+            self.clock.tick(self.ticks)
+
+        while(not finish):
+            self.screen.fill((0,0,0))
+            self.tmp = self.background.copy()
+            self.tmp.fill((100, 100, 100), None, pygame.BLEND_RGBA_MULT)
+            self.screen.blit(self.tmp, [0,50])
+            self.players[1].showUp(LEFT, passive2, self.screen)
+            self.players[1].draw(self.screen, hud=False)
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    finish = True
+            pygame.display.update()
+            self.clock.tick(self.ticks)
+            
+
+
+
     def switchEvent(self, pos, state):
         self.mapEventEffect[pos].setEventState(state)
 
@@ -156,6 +194,8 @@ class Render:
         self.players.append(RenderPlayer(self.fm, self.fixy, atbs[1].hp, atbs[1].mp, 2, second=True))
         for idx, p in enumerate(self.players):
             p.setName(players[idx].getName())
+        self.showUp(players[0].getAtb(), players[1].getAtb())
+        for idx, p in enumerate(self.players):
             p.setPos(self.xs[players[idx].getPos()], -1 + idx*2)
         self.fight()
         return True

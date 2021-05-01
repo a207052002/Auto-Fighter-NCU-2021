@@ -15,7 +15,7 @@ def passive():
     # 字母順序不影響效果呈現，我們只會數對應的字母數量有多少
     # 未滿 30 或是前 30 個內有規格外字母，就代表你放棄了這些天賦點
 
-    passive_str = "H" * 0 + "D" * 10 + "A" * 10 + "M" * 10
+    passive_str = "H" * 20 + "D" * 30 + "A" * 0 + "M" * 0
     return passive_str
 
 def combatLogic(enemy, me, eventmap):
@@ -112,25 +112,17 @@ def combatLogic(enemy, me, eventmap):
     if(my_mp <= 80):
         action = 0
     else:
-        if(abs(enemy_pos - my_pos) < 4):
-            if(my_pos <= 3 or my_pos >= 13):
-                action = "FFFFFF"
+        if(abs(enemy_pos - my_pos) > 1):
+            if(abs(enemy_pos - my_pos) > 3):
+                action = "F" * 3 + "R"
             else:
-                action = "B" * ( 5 - abs(enemy_pos - my_pos)) + "RRRRR"
-        elif(abs(enemy_pos - my_pos) <= 5 and my_mp <= 100):
-            action = "R" * abs(enemy_pos - my_pos)
-        elif(abs(enemy_pos - my_pos) <= 5):
-            action = "R" * abs(enemy_pos - my_pos) + "AAAA"
-        elif(abs(enemy_pos - my_pos) > 5):
-            action = "F"
-    if(my_avoid):
-        action = 2
-    if(my_power_shot):
-        action = 1
+                action = "F" * abs(enemy_pos - my_pos) + "R"
+        else:
+            action = "RA"
 
     return action
 
 def name():
     # 取個煞氣的名字吧，會顯示在角色上方
-    name = "欸欸欸名字可以自己取欸"
+    name = "坦克 NPC"
     return name

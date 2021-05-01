@@ -29,14 +29,15 @@ def stage():
     p1.setName(leftplayer.name())
 
     p2.advanced()
-    p2.setPassives(advanceTankNPC.passive())
-    p2.setActionLambda(advanceTankNPC.combatLogic)
-    p2.setName(advanceTankNPC.name())
+    p2.setPassives(NPC.passive())
+    p2.setActionLambda(NPC.combatLogic)
+    p2.setName(NPC.name())
+
     # p2.cheat()
     if(RENDER):
         renderer = Render(eventmap.getEventMap())
         renderer.startup([p1, p2])
-    
+
 
     print("player0:")
     p1.getAtb().show()

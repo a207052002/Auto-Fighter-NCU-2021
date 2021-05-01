@@ -1,5 +1,6 @@
 from player import *
 import random
+from numpy.random import choice
 
 
 class Eventmap:
@@ -22,9 +23,10 @@ class Eventmap:
                 map_idx.remove(idx)
         if(len(map_idx) != 0):
             event_pos = random.choice(map_idx)
-            event = random.randint(1,4)
+            event = choice(list(range(1,5)), 1, p=[0.2, 0.2, 0.3, 0.3])
             if(event == 3):
-                if(random.randint(0,30) >= self.round):
+                if(random.randint(1, 30) >= self.round):
+                    self.addround()
                     event = random.choice([1,2,4])
             self.mapInfo[event_pos] = event
     

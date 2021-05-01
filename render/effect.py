@@ -33,6 +33,8 @@ class Effect(pygame.sprite.Sprite):
             './render/resource/TaipeiSansTCBeta-Bold.ttf', 25)
         self.lFont = pygame.freetype.Font(
             './render/resource/TaipeiSansTCBeta-Bold.ttf', 200)
+        self.fontS = pygame.freetype.Font(
+            './render/resource/TaipeiSansTCBeta-Bold.ttf', 30)
         self.effects['wave'] = ss.load_strip((0, 32*3+1, 32, 32), 7)
         self.effects['power_wave'] = ss.load_strip((64*4+1, 0, 64, 64), 4)
         tmp_wave = ss.load_strip((64*4+1, 64*2 + 1, 64, 64), 4)
@@ -304,7 +306,27 @@ class Effect(pygame.sprite.Sprite):
         if(self.actionTimer > 5):
             return True
         return False
+    
+    def bar(self, x, y, l, maxl, color, screen, t):
+        if(t == 0):
+            tv, rect = self.fontS.render("HP", (0, 0, 0))
+        elif(t == 1):
+            tv, rect = self.fontS.render("DFS", (0, 0, 0))
+        elif(t == 2):
+            tv, rect = self.fontS.render("ATK", (0, 0, 0))
+        else:
+            tv, rect = self.fontS.render("MP", (0, 0, 0))
+
+        self.rect.center = (x, y)
+        self.image = pygame.Surface([358, 40], pygame.SRCALPHA).convert_alpha()
+        pygame.draw.rect(self.image, color, pygame.Rect(0, 0, 30+int(338*(l/maxl)*1.3), 40))
         
+        self.image.fill((255, 255, 255, int(round(((self.actionTimer)/10)*250))), None, pygame.BLEND_RGBA_MULT)
+        tv.fill((255, 255, 255, int(round(((self.actionTimer)/10)*250))), None, pygame.BLEND_RGBA_MULT)
+        if(self.actionTimer < 10):
+            self.actionTimer += 1
+        self.selfBlit(screen)
+        screen.blit(tv, (x-20, y-20))
     
     def setStatusEvent(self, event, x, y):
 

@@ -58,12 +58,16 @@ def calSkillAtb(s: str):
 
 def calAtb(s: str, max_p):
     skill_str = s[:max_p]
-    hp = skill_str.upper().count("H") * HP_PASSIVE_RATIO
-    dfs = skill_str.upper().count("D") * DEF_PASSIVE_RATIO
-    atk = skill_str.upper().count("A") * ATK_PASSIVE_RATIO
-    mp = skill_str.upper().count("M") * MP_PASSIVE_RATIO
+    count_h = skill_str.upper().count("H")
+    count_d = skill_str.upper().count("D")
+    count_a = skill_str.upper().count("A")
+    count_m = skill_str.upper().count("M")
+    hp = count_h * HP_PASSIVE_RATIO
+    dfs = count_d * DEF_PASSIVE_RATIO
+    atk = count_a * ATK_PASSIVE_RATIO
+    mp = count_m * MP_PASSIVE_RATIO
 
-    return attribute(hp, dfs, atk, mp)
+    return attribute(hp, dfs, atk, mp, [count_h, count_d, count_a, count_m])
 
 
 ''' you can simply "a" * n
@@ -102,13 +106,23 @@ class skill():
 
 
 class attribute:
-    def __init__(self, hp: int, dfs: float, atk: int, mp: int):
+    def __init__(self, hp: int, dfs: float, atk: int, mp: int, counts=None):
         self.hp = hp
         self.mp = mp
         self.atk = atk
         self.dfs = dfs
         self.max_hp = hp
         self.max_mp = mp
+        if(counts is not None):
+            self.h_c = counts[0]
+            self.d_c = counts[1]
+            self.a_c = counts[2]
+            self.m_c = counts[3]
+        else:
+            self.h_c = 0
+            self.d_c = 0
+            self.a_c = 0
+            self.m_c = 0
 
     def show(self):
         print("hp: %d, mp: %d, atk: %d, dfs: %f" %
@@ -161,6 +175,11 @@ class player:
         self.__atb.dfs += attr.dfs
         self.__atb.max_hp = self.__atb.hp
         self.__atb.max_mp = self.__atb.mp
+        self.__atb.h_c = attr.h_c
+        self.__atb.a_c = attr.a_c
+        self.__atb.m_c = attr.m_c
+        self.__atb.d_c = attr.d_c
+        # print(self.__atb.a_c, self.__atb.h_c, self.__atb.m_c, self.__atb.d_c)
 
     ''' canceled
     def setSkills(self, skill_str_arr):
