@@ -89,9 +89,6 @@ def combatLogic(enemy, me, eventmap):
     # 攻擊距離的上限為 6 格
     # 你的技能可以同時有攻擊跟移動的效果，你的人物總是會先移動再攻擊，請善用這個特性
 
-    # 倍率 1 普攻 
-    # "R"
-
     # 每個 "R" 消耗 mp
     R_mp = 10
     # 每個 "A" 消耗 mp
@@ -108,15 +105,106 @@ def combatLogic(enemy, me, eventmap):
     # "BBBRRRR" 遠離對手的方向跳遠後進行 4 格的普攻，風箏對手的概念
     # 以上含有 "R" 的就代表會攻擊，都可以自由加入 "A" 犧牲耗魔提高傷害
     # 請注意角色之間不能重疊，會強制落在前面一格，同時要注意被逼到角落時，要反過來利用很多 "F" 才能遠離對手
+    # 以下是 eventmap 陣列變數，裡面對應的各種道具的數字
 
+    POWER_SHOT = 1
+    AVOID_ITEM = 2
+    HEART = 3
+    MP_POTION = 4
     #----------- 以下請開始撰寫你的程式
 
-    # 每個 "R" 消耗 mp
-    R_mp = 10
-    # 每個 "A" 消耗 mp
-    A_mp = 20/3
-    # 每額外移動一格消耗 mp
-    M_mp = 10
+    # function 可以在 function 內定義喔
+    # 以下替你們做出幾個簡單的 function 提供你們使用
+    # Python function 內定義的 function 可以使用外面 function 的變數
+    # 如下
+    # 敵人是否在左或邊，回傳布林
+    def enemyOnRight():
+        return my_pos < enemy_pos
+    def enemyOnleft():
+        return enemy_pos < my_pos
+
+    def rang():
+        return abs(enemy_pos - my_pos)
+    def getItemsPosition(item):
+        return [idx for idx, pos in enumerate(eventmap) if pos == item]
+    
+    # 範例: 找到地圖中所有愛心的位置               愛心            愛心
+    # 範例地圖: [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 3, 4, 0, 1, 0, 3]
+    heart_position = getItemsPosition(HEART)
+    # heart_position 會是 [11, 16]
+
+    # 無論在何處都生成全力攻擊的字串程式
+    # 如果敵人在你 移動+攻擊 = 12 格之外 = 你打不到，會回傳空字串
+    def fullattack():
+        # 空字串，記住 "" + "a" 會等於 "a"，可以用來當作連續接字串的起始
+        action = ""
+        # 如果敵人離你的距離小於 12 才開始算
+        if rang() <= 12 :
+            # 如果敵人在攻擊範圍內
+            if rang() <= 6 :
+                # 剛好足夠的攻擊距離消耗的 MP 量
+                range_cost = rang() * M_mp
+                action = action + "R" * rang()
+                mp_left = my_mp - range_cost
+                if mp_left < 0 :
+                    # 如果發現扣掉後 MP 不夠，回傳空字串
+                    action = ""
+                    return action
+                # 攻擊距離夠了，剩下的 mp 會是 (my_mp - range_cost), mp_left
+                # 全都用在攻擊上
+                # 因為字串乘法如 "a" * 10 ，只允許跟整數存
+                # 你要使用 int() 把他的小數點丟掉變成整數
+                # attack_count 就是扣掉湊足攻擊距離後，剩下的 MP 可以放的 A 的數量
+
+                attack_count = int(mp_left/A_mp)
+                action = action + "A" * attack_count
+
+                return action
+
+        else:
+            return action
+
+    # 回傳全力遠離敵人的字串
+    def runAway():
+        action = ""
+        # 先看我實際能跑多遠
+        move_count = int(my_mp / M_mp)
+        # move_count 就是我移動的極限距離
+        if(enemyOnRight()):
+            # 敵人在右邊，我先看後退到極限距離會不會撞牆
+            # 不會的話我就往後跳(左)
+            if(my_pos - move_count >= 0):
+                 action = action + "B" * move_count
+            else:
+                # 會撞牆，我判斷我跳到牆邊離他比較遠還是往他那邊越過他跳更遠
+                # 敵人離最左邊格子的距離
+                enemy_to_left = abs(enemy_pos - 0)
+                # 左邊是我移動到牆邊離他多遠，右邊是我越過他全力跳躍的可以離他多遠
+                if(enemy_to_left >= move_count - rang()):
+                    # 移動牆邊 >= 穿過去，選擇到牆邊
+                    action = action + "B" * my_pos
+                else:
+                    # 反過來，選擇穿過
+                    action = action + "F" * move_count
+        else:
+            # 敵人在左邊的狀況，反過來
+            # 我先看後退(往右)到極限距離會不會撞牆(撞右邊的)
+            # 不會的話我就往後跳(右)跳到牆邊
+            if(my_pos + move_count <= 16):
+                 action = action + "B" * move_count
+            else:
+                # 會撞牆，我判斷我跳到牆邊離他比較遠還是往他那邊越過他跳更遠
+                # 敵人離最右邊格子的距離
+                enemy_to_right = abs(enemy_pos - 16)
+                # 左邊是我移動到最右離他多遠，右邊是我越過他全力跳躍的可以離他多遠
+                if(enemy_to_right >= move_count - rang()):
+                    # 移動最右邊 >= 穿過去，選擇到牆邊
+                    action = action + "B" * my_pos
+                else:
+                    # 反過來，選擇穿過
+                    action = action + "F" * move_count
+        return action
+        
 
     action = 0
     if(my_mp <= 80):
