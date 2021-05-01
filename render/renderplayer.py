@@ -381,12 +381,12 @@ class RenderPlayer(pygame.sprite.Sprite):
         if(self.state != 'dead'):
             self.state = 'dead'
             self.actionTimer = 0
-            self.image = self.images['dead'][self.actionTimer]
+            self.image = self.images['dead'][self.actionTimer%7]
             if(toward is LEFT):
                 self.image = pygame.transform.flip(self.image, True, False)
             self.actionTimer += 1
         else:
-            self.image = self.images['dead'][self.actionTimer]
+            self.image = self.images['dead'][self.actionTimer%7]
             if(toward is LEFT):
                 self.image = pygame.transform.flip(self.image, True, False)
             x, y = self.rect.center

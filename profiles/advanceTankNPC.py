@@ -15,7 +15,7 @@ def passive():
     # 字母順序不影響效果呈現，我們只會數對應的字母數量有多少
     # 未滿 30 或是前 30 個內有規格外字母，就代表你放棄了這些天賦點
 
-    passive_str = "H" * 20 + "D" * 30 + "A" * 0 + "M" * 0
+    passive_str = "H" * 15 + "D" * 45 + "A" * 0 + "M" * 0
     return passive_str
 
 def combatLogic(enemy, me, eventmap):

@@ -15,7 +15,7 @@ def passive():
     # 字母順序不影響效果呈現，我們只會數對應的字母數量有多少
     # 未滿 30 或是前 30 個內有規格外字母，就代表你放棄了這些天賦點
 
-    passive_str = "H" * 0 + "D" * 10 + "A" * 10 + "M" * 10
+    passive_str = "H" * 20 + "D" * 10 + "A" * 10 + "M" * 10
     return passive_str
 
 def combatLogic(enemy, me, eventmap):
@@ -132,5 +132,5 @@ def combatLogic(enemy, me, eventmap):
 
 def name():
     # 取個煞氣的名字吧，會顯示在角色上方
-    name = "欸欸欸名字可以自己取欸"
+    name = "塊陶阿"
     return name

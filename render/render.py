@@ -58,6 +58,7 @@ class Render:
     def showUp(self, passive1, passive2):
         finish = False
         while(not finish):
+            eventMonitor()
             self.screen.fill((0,0,0))
             self.tmp = self.background.copy()
             self.tmp.fill((100, 100, 100), None, pygame.BLEND_RGBA_MULT)
@@ -147,6 +148,7 @@ class Render:
             toward = RIGHT
         finish = False
         while(not finish):
+            eventMonitor()
             self.drawBackground()
             self.clock.tick(self.ticks)
             finish = loser.dead(toward)
@@ -223,6 +225,7 @@ class Render:
         fight_effect.setFight(round(1024/2), round(480/2))
         finish = False
         while(not finish):
+            eventMonitor()
             finish = fight_effect.fight()
             self.drawBackground()
             self.draw()
@@ -331,11 +334,15 @@ class Render:
         win_effect.setWinner(name, round(1024/2), round(480/2))
         finish = False
         while(not finish):
-            finish = win_effect.win()
+            eventMonitor()
+            win_effect.win()
             self.drawBackground()
             self.draw()
             win_effect.draw(self.screen)
             pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    finish = True
             self.clock.tick(self.ticks)
 
     def drawBackground_s(self, eventmap):
