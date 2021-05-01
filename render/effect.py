@@ -307,15 +307,15 @@ class Effect(pygame.sprite.Sprite):
             return True
         return False
     
-    def bar(self, x, y, l, maxl, color, screen, t):
+    def bar(self, x, y, l, maxl, color, screen, t, passive):
         if(t == 0):
-            tv, rect = self.fontS.render("HP", (0, 0, 0))
+            tv, rect = self.fontS.render("HP %d" % (passive.max_hp), (0, 0, 0))
         elif(t == 1):
-            tv, rect = self.fontS.render("DFS", (0, 0, 0))
+            tv, rect = self.fontS.render("DFS %.2f %%免傷率" % (100*passive.dfs/660) , (0, 0, 0))
         elif(t == 2):
-            tv, rect = self.fontS.render("ATK", (0, 0, 0))
+            tv, rect = self.fontS.render("ATK %d" % (passive.atk), (0, 0, 0))
         else:
-            tv, rect = self.fontS.render("MP", (0, 0, 0))
+            tv, rect = self.fontS.render("MP %d" % ((passive.max_mp)), (0, 0, 0))
 
         self.rect.center = (x, y)
         self.image = pygame.Surface([358, 40], pygame.SRCALPHA).convert_alpha()

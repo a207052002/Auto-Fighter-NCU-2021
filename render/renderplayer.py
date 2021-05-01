@@ -115,10 +115,10 @@ class RenderPlayer(pygame.sprite.Sprite):
         self.rect.center = (coorx - spx, (480/2) - spy - 20)
         tsx = int(self.b_name_img.get_size()[0]/2)
         screen.blit(self.b_name_img, (coorx - tsx, (480/2) + 190 ))
-        self.php_bar.bar(bar_x, y_offset*2 - 20, passive.h_c, 30, (90, 200, 20), screen, 0)
-        self.pdfs_bar.bar(bar_x, y_offset*3 - 20, passive.d_c, 30, (105, 105, 105), screen, 1)
-        self.patk_bar.bar(bar_x, y_offset*4 - 20, passive.a_c, 30, (220, 180, 20), screen, 2)
-        self.pmp_bar.bar(bar_x, y_offset*5 - 20, passive.m_c, 30, (70, 70, 225), screen, 3)
+        self.php_bar.bar(bar_x, y_offset*2 - 20, passive.h_c, 30, (90, 200, 20), screen, 0, passive)
+        self.pdfs_bar.bar(bar_x, y_offset*3 - 20, passive.d_c, 30, (105, 105, 105), screen, 1, passive)
+        self.patk_bar.bar(bar_x, y_offset*4 - 20, passive.a_c, 30, (220, 180, 20), screen, 2, passive)
+        self.pmp_bar.bar(bar_x, y_offset*5 - 20, passive.m_c, 30, (70, 70, 225), screen, 3, passive)
 
         self.actionTimer += 1
 
