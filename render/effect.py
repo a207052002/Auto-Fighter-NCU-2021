@@ -81,7 +81,7 @@ class Effect(pygame.sprite.Sprite):
             self.rect = self.image.get_rect()
         else:
             self.image = self.effect[kind][index]
-            if(toward is 0):
+            if(toward == 0):
                 self.image = pygame.transform.flip(self.image, True, False)
             self.image = pygame.transform.scale(
                 self.image, tuple(np.array(self.image.get_size()) * scale))
@@ -267,9 +267,9 @@ class Effect(pygame.sprite.Sprite):
 
     def setEvent(self, x, y, event):
         size_x, size_y = 30, 30
-        if(event is 1):
+        if(event == 1):
             self.image = self.effects['power_event']
-        elif(event is 2):
+        elif(event == 2):
             self.image = self.effects['avoid_event']
         else:
             self.image = pygame.Surface([56, 50], pygame.SRCALPHA)
