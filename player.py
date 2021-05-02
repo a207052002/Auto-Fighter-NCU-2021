@@ -113,6 +113,7 @@ class attribute:
         self.dfs = dfs
         self.max_hp = hp
         self.max_mp = mp
+        self.round = 0
         if(counts is not None):
             self.h_c = counts[0]
             self.d_c = counts[1]
@@ -296,7 +297,8 @@ class player:
             self.__atb.mp = self.__atb.max_mp
         if(self.__atb.hp > self.__atb.max_hp):
             self.__atb.hp = self.__atb.max_hp
-        
+
+        self.__atb.round += 1
         return (atk_range, move, dmg, actual_mp_reg, enemy.avoid_buff, self.trigger_event, self.recover)
     
     def buffExpire(self):

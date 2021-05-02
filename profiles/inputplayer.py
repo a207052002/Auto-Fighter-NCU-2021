@@ -32,13 +32,10 @@ def combatLogic(enemy, me, eventmap):
     # 以上兩個道具撿到後會存在身上直到使用，已經持有一樣的道具可以再撿但是不會額外增加數量
     # 3 代表存在 H (Heart) 撿到後可以回覆 15%+500 的生命(對坦克型角色有很好的效果)
     # 4 代表存在 M (Mp) 撿到後可以回覆 20% 魔力(MP 高的角色收益高)
-    # 每樣道具都非常強大，並且每回合結束後有一定機率隨機產生在地圖上，建議可以考慮以道具的撿取跟使用優
-
+    # 每樣道具都非常強大，並且每回合結束後有一定機率隨機產生在地圖上，建議可以考慮以道具的撿取跟使用優先
 
     enemy_atb = enemy.getAtb()
     my_atb = me.getAtb()
-
-    passed_round = my_atb.round
 
     # 敵人當前的血量、魔力、攻擊力、防禦力、位置(0-16)
     enemy_hp = enemy_atb.hp
@@ -121,117 +118,14 @@ def combatLogic(enemy, me, eventmap):
     # Python function 內定義的 function 可以使用外面 function 的變數
     # 如下
     # 敵人是否在左或邊，回傳布林
-    def enemyOnRight():
-        return my_pos < enemy_pos
-    def enemyOnleft():
-        return enemy_pos < my_pos
 
-    def rang():
-        return abs(enemy_pos - my_pos)
-    def getItemsPosition(item):
-        return [idx for idx, pos in enumerate(eventmap) if pos == item]
-    
-    # 範例: 找到地圖中所有愛心的位置               愛心            愛心
-    # 範例地圖: [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 3, 4, 0, 1, 0, 3]
-    heart_position = getItemsPosition(HEART)
-    # heart_position 會是 [11, 16]
-
-    # 無論在何處都生成全力攻擊的字串程式
-    # 如果敵人在你 移動+攻擊 = 12 格之外 = 你打不到，會回傳空字串
-    def fullattack():
-        # 空字串，記住 "" + "a" 會等於 "a"，可以用來當作連續接字串的起始
-        action = ""
-        # 如果敵人離你的距離小於 12 才開始算
-        if rang() <= 12 :
-            # 如果敵人在攻擊範圍內
-            if rang() <= 6 :
-                # 剛好足夠的攻擊距離消耗的 MP 量
-                range_cost = rang() * M_mp
-                action = action + "R" * rang()
-                mp_left = my_mp - range_cost
-                if mp_left < 0 :
-                    # 如果發現扣掉後 MP 不夠，回傳空字串
-                    action = ""
-                    return action
-                # 攻擊距離夠了，剩下的 mp 會是 (my_mp - range_cost), mp_left
-                # 全都用在攻擊上
-                # 因為字串乘法如 "a" * 10 ，只允許跟整數存
-                # 你要使用 int() 把他的小數點丟掉變成整數
-                # attack_count 就是扣掉湊足攻擊距離後，剩下的 MP 可以放的 A 的數量
-
-                attack_count = int(mp_left/A_mp)
-                action = action + "A" * attack_count
-
-                return action
-
-        else:
-            return action
-
-    # 回傳全力遠離敵人的字串
-    def runAway():
-        action = ""
-        # 先看我實際能跑多遠
-        move_count = int(my_mp / M_mp)
-        # move_count 就是我移動的極限距離
-        if(enemyOnRight()):
-            # 敵人在右邊，我先看後退到極限距離會不會撞牆
-            # 不會的話我就往後跳(左)
-            if(my_pos - move_count >= 0):
-                 action = action + "B" * move_count
-            else:
-                # 會撞牆，我判斷我跳到牆邊離他比較遠還是往他那邊越過他跳更遠
-                # 敵人離最左邊格子的距離
-                enemy_to_left = abs(enemy_pos - 0)
-                # 左邊是我移動到牆邊離他多遠，右邊是我越過他全力跳躍的可以離他多遠
-                if(enemy_to_left >= move_count - rang()):
-                    # 移動牆邊 >= 穿過去，選擇到牆邊
-                    action = action + "B" * my_pos
-                else:
-                    # 反過來，選擇穿過
-                    action = action + "F" * move_count
-        else:
-            # 敵人在左邊的狀況，反過來
-            # 我先看後退(往右)到極限距離會不會撞牆(撞右邊的)
-            # 不會的話我就往後跳(右)跳到牆邊
-            if(my_pos + move_count <= 16):
-                 action = action + "B" * move_count
-            else:
-                # 會撞牆，我判斷我跳到牆邊離他比較遠還是往他那邊越過他跳更遠
-                # 敵人離最右邊格子的距離
-                enemy_to_right = abs(enemy_pos - 16)
-                # 左邊是我移動到最右離他多遠，右邊是我越過他全力跳躍的可以離他多遠
-                if(enemy_to_right >= move_count - rang()):
-                    # 移動最右邊 >= 穿過去，選擇到牆邊
-                    action = action + "B" * my_pos
-                else:
-                    # 反過來，選擇穿過
-                    action = action + "F" * move_count
-        return action
-        
-
-    action = 0
-    if(my_mp <= 80):
-        action = 0
-    else:
-        if(abs(enemy_pos - my_pos) < 4):
-            if(my_pos <= 3 or my_pos >= 13):
-                action = "FFFFFF"
-            else:
-                action = "B" * ( 5 - abs(enemy_pos - my_pos)) + "RRRRR"
-        elif(abs(enemy_pos - my_pos) <= 5 and my_mp <= 100):
-            action = "R" * abs(enemy_pos - my_pos)
-        elif(abs(enemy_pos - my_pos) <= 5):
-            action = "R" * abs(enemy_pos - my_pos) + "AAAA"
-        elif(abs(enemy_pos - my_pos) > 5):
-            action = "F"
-    if(my_avoid):
-        action = 2
-    if(my_power_shot):
-        action = 1
+    action = input("輸入你要的動作：")
+    if(action.isnumeric()):
+        action = int(action)
 
     return action
 
 def name():
     # 取個煞氣的名字吧，會顯示在角色上方
-    name = "欸欸欸名字可以自己取欸"
+    name = "我都聽你的"
     return name

@@ -57,8 +57,10 @@ class Render:
 
     def showUp(self, passive1, passive2):
         finish = False
+        counter = 0
         while(not finish):
             eventMonitor()
+            counter += 1
             self.screen.fill((0,0,0))
             self.tmp = self.background.copy()
             self.tmp.fill((100, 100, 100), None, pygame.BLEND_RGBA_MULT)
@@ -70,7 +72,10 @@ class Render:
                     finish = True
             pygame.display.update()
             self.clock.tick(self.ticks)
+            if(counter > 120):
+                finish = True
 
+        counter = 0
         finish = False
         for i in range(1):
             self.tmp = self.background.copy()
@@ -79,6 +84,7 @@ class Render:
             self.clock.tick(self.ticks)
 
         while(not finish):
+            counter += 1
             self.screen.fill((0,0,0))
             self.tmp = self.background.copy()
             self.tmp.fill((100, 100, 100), None, pygame.BLEND_RGBA_MULT)
@@ -90,6 +96,8 @@ class Render:
                     finish = True
             pygame.display.update()
             self.clock.tick(self.ticks)
+            if(counter > 120):
+                finish = True
             
 
 
@@ -168,9 +176,9 @@ class Render:
             self.draw()
             pygame.display.update()
         self.updateStatus(player)
-        if(self.eventmap[pos] is 1):
+        if(self.eventmap[pos] == 1):
             self.players[player.getPid()].power_shot_ready = True
-        elif(self.eventmap[pos] is 2):
+        elif(self.eventmap[pos] == 2):
             self.players[player.getPid()].avoid_ready = True
         self.eventmap = eventmap
         self.reset()

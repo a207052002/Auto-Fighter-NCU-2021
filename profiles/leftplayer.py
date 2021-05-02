@@ -37,6 +37,9 @@ def combatLogic(enemy, me, eventmap):
     enemy_atb = enemy.getAtb()
     my_atb = me.getAtb()
 
+    passed_round = my_atb.round
+    print(passed_round)
+
     # 敵人當前的血量、魔力、攻擊力、防禦力、位置(0-16)
     enemy_hp = enemy_atb.hp
     enemy_mp = enemy_atb.mp
